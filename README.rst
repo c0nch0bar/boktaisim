@@ -4,6 +4,8 @@ README
 
 boktaisim is a small tkinter application and library to make playing the Boktai trilogy of games more easy. For more information, read through the `Background` section.
 
+|
+|
 
 -----------
 Screenshots
@@ -21,6 +23,8 @@ Options screen
 
 |options|
 
+|
+|
 
 ----------
 Background
@@ -46,6 +50,8 @@ I think that just about covers it. If you are feeling generous you can check out
 
 -- Nathan Stiles, of Stiles' Reviews
 
+|
+|
 
 ~~~~~~~~~~~~~~~~~~~~~~
 Connor Barthold, Coder
@@ -55,6 +61,8 @@ It seemed like a neat project.
 
 -- Connor Barthold, of The Internet
 
+|
+|
 
 -----
 Setup
@@ -62,6 +70,8 @@ Setup
 
 No special setup is required, everything should run out of the box after installation or download. If you want to view the distributions of possible values available, `matplotlib`_ is required.
 
+|
+|
 
 -------------
 Configuration
@@ -69,6 +79,8 @@ Configuration
 
 A default config file will be generated on first run and stored in the user's application data directory (utilizing the `appdirs`_ package). This file contains both configuration settings and the last input data, and is saved automatically any time either of these changes.
 
+|
+|
 
 -----
 Usage
@@ -80,6 +92,8 @@ Running as a GUI Application
 
 This is the main way the package is intended to be used. Simply run `boktaisim` after installing with `python setup.py install` to launch the tkinter interface. Alternatively, launch `boktaisim.app` or `boktaisim.exe` if using one of the pre-packaged executables.
 
+|
+|
 
 ~~~~~~~~~~~~~~~~~~~~~~
 Importing as a Library
@@ -93,6 +107,8 @@ The `BoktaiSim` class can be imported and used directly without a GUI interface.
 6
 >>>
 
+|
+|
 
 -----
 To-Do
@@ -115,6 +131,8 @@ Pull requests are always welcome!
  - rewrite `__str__` for `BoktaiSim`
  - Support for console mode
 
+|
+|
 
 ----------------
 Acknowledgements
@@ -130,11 +148,11 @@ the `pyzipcode project`_.
 
 
 .. |boktai1| image:: screenshots/boktai1_manual.png
-  :width: 400
+  :width: 200
 .. |boktai2| image:: screenshots/boktai2_zip.png
-  :width: 400
+  :width: 200
 .. |options| image:: screenshots/options.png
-  :width: 400
+  :width: 200
 
 .. _Retroarch: https://www.retroarch.com/
 .. _mGBA: https://mgba.io/
