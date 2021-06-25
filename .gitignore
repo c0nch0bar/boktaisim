@@ -1,0 +1,12 @@
+*.pyc
+*.egg-info
+config.json
+build
+dist
+venv
+.idea
+.pytest_cache
+junk
+flow
+/testing/
+/samples/

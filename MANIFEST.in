@@ -1,0 +1,11 @@
+# Include the README
+include README.rst
+
+# Include license file
+include LICENSE.txt
+
+# Include changelog
+include CHANGELOG.rst
+
+# Include resource files
+include boktaisim/resources/*
