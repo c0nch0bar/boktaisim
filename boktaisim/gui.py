@@ -78,7 +78,8 @@ class WindowManager(object):
     def _set_icon(self) -> None:
         system = platform.system()
         if system == 'Windows':
-            self.window.iconbitmap(self._imgs["boktaisim_icon.ico"])
+            # self.window.iconbitmap(self._imgs["boktaisim_icon.ico"])
+            pass
         elif system == 'Darwin':
             # Looks like there's no actual way to set an icon on Mac with tkinter :'(
             # self.window.iconbitmap(self._imgs["boktaisim_icon.gif"])
