@@ -68,8 +68,8 @@ class WindowManager(object):
         for image_name in IMAGES:
             if sys.platform == 'darwin' and hasattr(sys, 'frozen') and sys.frozen == 'macosx_app':
                 self._imgs[image_name] = image_name
-            elif sys.platform == 'win32':
-                pass
+            # elif sys.platform == 'win32':
+            #     pass
             else:
                 with pkg_resources.path('boktaisim.resources', image_name) as image_path:
                     self._imgs[image_name] = image_path
@@ -78,7 +78,7 @@ class WindowManager(object):
     def _set_icon(self) -> None:
         system = platform.system()
         if system == 'Windows':
-            # self.window.iconbitmap(self._imgs["boktaisim_icon.ico"])
+            self.window.iconbitmap(self._imgs["boktaisim_icon.ico"])
             pass
         elif system == 'Darwin':
             # Looks like there's no actual way to set an icon on Mac with tkinter :'(
@@ -202,7 +202,7 @@ class WindowManager(object):
             zipcode_entry.insert(0, self.config.zipcode)
         zipcode_note_label = tkinter.Label(
             zipcode_frame, text='USA zipcodes only, for \nother locations, use Lat/Lon',
-            font=("TkDefaultFont", 12, "italic"), name='zipcode_note_label'
+            font="TkSmallCaptionFont", name='zipcode_note_label'
         )
         lat_label = tkinter.Label(latlon_frame, text='Latitude: ', name='lat_label')
         lat_entry = tkinter.Entry(latlon_frame, width=10, name='lat_entry')
@@ -213,7 +213,7 @@ class WindowManager(object):
         latlon_note_label = tkinter.Label(
             latlon_frame,
             text='Click here to find your lat/lon',
-            fg="blue", cursor="hand", name='latlon_note_label'
+            fg="blue", cursor="hand1", name='latlon_note_label'
         )
         if self.config.lon:
             lon_entry.insert(0, self.config.lon)
@@ -496,8 +496,7 @@ class WindowManager(object):
             options_frame, text='*Boktai is not meant to be played at night and by default this \n'
                                 'program reflects that. This setting uses lower readings based \n'
                                 'off of weather, excluding sunlight.',
-            font=("TkDefaultFont", 12, "italic"),
-            name='lunar_mode_notes_label'
+            font="TkSmallCaptionFont", name='lunar_mode_notes_label'
         )
         lunar_mode_theme_separator = tkinter.ttk.Separator(options_frame)
         theme_picker_frame = tkinter.Frame(options_frame, name='theme_picker_frame')
@@ -1007,15 +1006,15 @@ class WindowManager(object):
         more_info_frame = tkinter.Frame(about_window, border=3, relief='ridge')
         credits_idea_pre = tkinter.Label(more_info_frame, text='Idea by Nathan Stiles of')
         credits_idea_post = tkinter.Label(
-            more_info_frame, text=f'Stiles\' Reviews', fg="blue", cursor="hand"
+            more_info_frame, text=f'Stiles\' Reviews', fg="blue", cursor="hand1"
         )
         credits_coding_pre = tkinter.Label(more_info_frame, text='Original code by')
         credits_coding_post = tkinter.Label(
-            more_info_frame, text='Connor Barthold', fg='blue', cursor='hand'
+            more_info_frame, text='Connor Barthold', fg='blue', cursor='hand1'
         )
         credits_api_pre = tkinter.Label(more_info_frame, text='Uses the free')
         credits_api_post = tkinter.Label(
-            more_info_frame, text='MetaWeather API', fg='blue', cursor='hand'
+            more_info_frame, text='MetaWeather API', fg='blue', cursor='hand1'
         )
 
         close_button = tkinter.ttk.Button(
