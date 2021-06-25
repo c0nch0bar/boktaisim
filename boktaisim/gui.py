@@ -68,8 +68,8 @@ class WindowManager(object):
         for image_name in IMAGES:
             if sys.platform == 'darwin' and hasattr(sys, 'frozen') and sys.frozen == 'macosx_app':
                 self._imgs[image_name] = image_name
-            # elif sys.platform == 'win32':
-            #     pass
+            elif sys.platform == 'win32' and hasattr(sys, 'frozen'):
+                pass
             else:
                 with pkg_resources.path('boktaisim.resources', image_name) as image_path:
                     self._imgs[image_name] = image_path
