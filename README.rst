@@ -13,15 +13,15 @@ Screenshots
 
 Boktai 1 using manual data
 
-![Boktai 1](screenshots/boktai1_manual.png){width=30%}
+|boktai1|
 
 Boktai 2 using zipcode
 
-![Boktai 2](screenshots/boktai2_zip.png){width=30%}
+|boktai2|
 
 Options screen
 
-![boktaisim options](screenshots/options.png){width=30%}
+|options|
 
 |
 |
@@ -146,6 +146,10 @@ Weather icons were taken from `Font Awesome`_, with some adaptions.
 Because of difficulties with packaging on Mac, this program includes a copy of `zipcodes.db` from
 the `pyzipcode project`_.
 
+
+.. |boktai1| image:: screenshots/boktai1_manual.png
+.. |boktai2| image:: screenshots/boktai2_zip.png
+.. |options| image:: screenshots/options.png
 
 .. _Retroarch: https://www.retroarch.com/
 .. _mGBA: https://mgba.io/
