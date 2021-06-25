@@ -93,7 +93,7 @@ class WindowManager(object):
         self.window.maxsize()
         style = tkinter.ttk.Style(self.window)
         # style.theme_create("boktai", settings={})
-        hours = list(range(0, 25))
+        hours = list(range(0, 24))
         minutes = list(range(0, 60))
 
         style.theme_use("classic")
@@ -362,44 +362,50 @@ class WindowManager(object):
         boktai1_meter_bg_img = tkinter.PhotoImage(
             file=self._imgs["boktai1_meter_empty.gif"]
         )
-        boktai1_meter_bg = tkinter.Label(
-            boktai_meter_frame, width=270, height=51, image=boktai1_meter_bg_img,
-            bg='#ECECEC', highlightbackground='#ECECEC', name="boktai1_meter_bg"
+        boktai1_meter_bg = tkinter.Canvas(
+            boktai_meter_frame, width=270, height=51,
+            bg='#ECECEC', highlightbackground='#ECECEC', borderwidth=0, highlightthickness=0,
+            name="boktai1_meter_bg"
         )
         boktai2_meter_bg_img = tkinter.PhotoImage(
             file=self._imgs["boktai2_meter_empty.gif"]
         )
-        boktai2_meter_bg = tkinter.Label(
-            boktai_meter_frame, width=280, height=51, image=boktai2_meter_bg_img,
-            bg='#ECECEC', highlightbackground='#ECECEC', name="boktai2_meter_bg"
+        boktai2_meter_bg = tkinter.Canvas(
+            boktai_meter_frame, width=280, height=51,
+            bg='#ECECEC', highlightbackground='#ECECEC', borderwidth=0, highlightthickness=0,
+            name="boktai2_meter_bg"
         )
         boktai3_meter_bg_img = tkinter.PhotoImage(
             file=self._imgs["boktai3_meter_empty.gif"]
         )
-        boktai3_meter_bg = tkinter.Label(
-            boktai_meter_frame, width=280, height=51, image=boktai3_meter_bg_img,
-            bg='#ECECEC', highlightbackground='#ECECEC', name="boktai3_meter_bg"
+        boktai3_meter_bg = tkinter.Canvas(
+            boktai_meter_frame, width=280, height=51,
+            bg='#ECECEC', highlightbackground='#ECECEC', borderwidth=0, highlightthickness=0,
+            name="boktai3_meter_bg"
         )
         boktai1_meter_fg_img = tkinter.PhotoImage(
             file=self._imgs["boktai1_meter_full.gif"]
         )
-        boktai1_meter_fg = tkinter.Label(
-            boktai_meter_frame, width=0, height=51, image=boktai1_meter_fg_img,
-            bg='#ECECEC', highlightbackground='#ECECEC', name="boktai1_meter_fg"
+        boktai1_meter_fg = tkinter.Canvas(
+            boktai_meter_frame, width=0, height=51,
+            bg='#ECECEC', highlightbackground='#ECECEC', borderwidth=0, highlightthickness=0,
+            name="boktai1_meter_fg"
         )
         boktai2_meter_fg_img = tkinter.PhotoImage(
             file=self._imgs["boktai2_meter_full.gif"]
         )
-        boktai2_meter_fg = tkinter.Label(
-            boktai_meter_frame, width=0, height=51, image=boktai2_meter_fg_img,
-            bg='#ECECEC', highlightbackground='#ECECEC', name="boktai2_meter_fg"
+        boktai2_meter_fg = tkinter.Canvas(
+            boktai_meter_frame, width=0, height=51,
+            bg='#ECECEC', highlightbackground='#ECECEC', borderwidth=0, highlightthickness=0,
+            name="boktai2_meter_fg"
         )
         boktai3_meter_fg_img = tkinter.PhotoImage(
             file=self._imgs["boktai3_meter_full.gif"]
         )
-        boktai3_meter_fg = tkinter.Label(
-            boktai_meter_frame, width=0, height=51, image=boktai3_meter_fg_img,
-            bg='#ECECEC', highlightbackground='#ECECEC', name="boktai3_meter_fg"
+        boktai3_meter_fg = tkinter.Canvas(
+            boktai_meter_frame, width=0, height=51,
+            bg='#ECECEC', highlightbackground='#ECECEC', borderwidth=0, highlightthickness=0,
+            name="boktai3_meter_fg"
         )
 
         ui_update_frame = tkinter.Frame(options_frame, name='ui_update_frame')
@@ -625,17 +631,23 @@ class WindowManager(object):
             boktai_3_logo.grid_remove()
         boktai_meter_frame.grid(column=0, row=3, columnspan=8)
         boktai1_meter_bg.grid(column=0, row=4, columnspan=8)
+        boktai1_meter_bg.create_image(0, 0, anchor=tkinter.NW, image=boktai1_meter_bg_img)
         boktai1_meter_fg.grid(column=0, row=4, columnspan=8)
+        boktai1_meter_fg.create_image(0, 0, anchor=tkinter.NW, image=boktai1_meter_fg_img)
         if self.config.version != 1:
             boktai1_meter_bg.grid_remove()
             boktai1_meter_fg.grid_remove()
         boktai2_meter_bg.grid(column=0, row=4, columnspan=8)
+        boktai2_meter_bg.create_image(0, 0, anchor=tkinter.NW, image=boktai2_meter_bg_img)
         boktai2_meter_fg.grid(column=0, row=4, columnspan=8)
+        boktai2_meter_fg.create_image(0, 0, anchor=tkinter.NW, image=boktai2_meter_fg_img)
         if self.config.version != 2:
             boktai2_meter_bg.grid_remove()
             boktai2_meter_fg.grid_remove()
         boktai3_meter_bg.grid(column=0, row=4, columnspan=8)
+        boktai3_meter_bg.create_image(0, 0, anchor=tkinter.NW, image=boktai3_meter_bg_img)
         boktai3_meter_fg.grid(column=0, row=4, columnspan=8)
+        boktai3_meter_fg.create_image(0, 0, anchor=tkinter.NW, image=boktai3_meter_fg_img)
         if self.config.version != 3:
             boktai3_meter_bg.grid_remove()
             boktai3_meter_fg.grid_remove()
