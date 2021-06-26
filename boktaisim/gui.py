@@ -88,8 +88,8 @@ class WindowManager(object):
             self.window.iconbitmap(self._imgs["boktaisim_icon.gif.xbm"])
 
     def main(self, pipe: Optional[multiprocessing.Pipe] = None) -> None:
-        self.window.geometry('400x475')
-        self.window.minsize(400, 475)
+        self.window.geometry('405x480')
+        self.window.minsize(405, 480)
         self.window.maxsize()
         style = tkinter.ttk.Style(self.window)
         # style.theme_create("boktai", settings={})
@@ -633,6 +633,7 @@ class WindowManager(object):
         boktai1_meter_bg.create_image(0, 0, anchor=tkinter.NW, image=boktai1_meter_bg_img)
         boktai1_meter_fg.grid(column=0, row=4, columnspan=8)
         boktai1_meter_fg.create_image(0, 0, anchor=tkinter.NW, image=boktai1_meter_fg_img)
+        boktai1_meter_fg.grid_remove()
         if self.config.version != 1:
             boktai1_meter_bg.grid_remove()
             boktai1_meter_fg.grid_remove()
@@ -735,8 +736,7 @@ class WindowManager(object):
             return
         self.config.version = int(self._widget_dict['version_combo'].get())
         if not 0 < self.config.version < 4:
-            self.play_sound('warning')
-            messagebox.showwarning('Warning', 'Boktai version must be between 1 and 3.')
+            self.alert('warning', 'Boktai version must be between 1 and 3.')
             return
         update_logo = False
         if (self.boktaisim and self._last_version != self.version) or \
@@ -753,6 +753,7 @@ class WindowManager(object):
                 )
             except ValueError:
                 self.alert('warning', 'No zipcode provided.')
+                return
             try:
                 latlong = zip_to_latlong(self.config.zipcode)
             except KeyError:
@@ -764,6 +765,7 @@ class WindowManager(object):
                 float(self._widget_dict['lon_entry'].get())
             except ValueError:
                 self.alert('warning', 'Invalid latitude and longitude provided.')
+                return
             self.config.lat = self._widget_dict['lat_entry'].get()
             self.config.lon = self._widget_dict['lon_entry'].get()
             latlong = f'{self.config.lat},{self.config.lon}'

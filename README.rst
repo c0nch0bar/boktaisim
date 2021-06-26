@@ -117,10 +117,11 @@ To-Do
 Pull requests are always welcome!
 
  - Save location tab
- - Overheat for alerts (graphic and sound)
+ - Overheat for alerts (graphic)
  - Graphs for all possible combinations for testing
  - Complete README
 
+ - Add horizontal scrollbar to logging window
  - Better code documentation
  - UI Scaling
  - Add setting for logging verbosity
