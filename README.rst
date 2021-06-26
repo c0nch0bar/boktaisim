@@ -116,7 +116,6 @@ To-Do
 
 Pull requests are always welcome!
 
- - Save location tab
  - Overheat for alerts (graphic)
  - Graphs for all possible combinations for testing
  - Complete README

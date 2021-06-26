@@ -178,7 +178,7 @@ class WindowManager(object):
             name='boktai3_logo'
         )
         area_notebook = tkinter.ttk.Notebook(
-            simulator_frame, name='area_notebook', style='centered.TNotebook'
+            simulator_frame, style='centered.TNotebook', name='area_notebook'
         )
         zipcode_frame = tkinter.Frame(area_notebook, name='zipcode_frame')
         latlon_frame = tkinter.Frame(area_notebook, name='latlon_frame')
@@ -582,6 +582,7 @@ class WindowManager(object):
         zipcode_frame.columnconfigure(1, weight=1)
         zipcode_frame.rowconfigure(0, weight=1)
         zipcode_frame.rowconfigure(1, weight=1)
+        zipcode_frame.bind('<Visibility>', self._tab_switch)
         zipcode_label.grid(column=0, row=0, sticky=tkinter.E)
         zipcode_entry.grid(column=1, row=0, sticky=tkinter.W)
         zipcode_note_label.grid(column=0, row=1, columnspan=2, sticky=tkinter.N)
@@ -591,6 +592,7 @@ class WindowManager(object):
         latlon_frame.columnconfigure(3, weight=1)
         latlon_frame.rowconfigure(0, weight=1)
         latlon_frame.rowconfigure(1, weight=1)
+        latlon_frame.bind('<Visibility>', self._tab_switch)
         lat_label.grid(column=0, row=0, sticky=tkinter.E)
         lat_entry.grid(column=1, row=0, sticky=tkinter.W)
         lon_label.grid(column=2, row=0, sticky=tkinter.E)
@@ -606,6 +608,7 @@ class WindowManager(object):
         manual_frame.columnconfigure(3, weight=1)
         manual_frame.columnconfigure(4, weight=1)
         manual_frame.columnconfigure(5, weight=1)
+        manual_frame.bind('<Visibility>', self._tab_switch)
         min_f_label.grid(column=0, row=0, sticky=tkinter.E)
         min_f_entry.grid(column=1, row=0, sticky=tkinter.W)
         avg_f_label.grid(column=2, row=0, sticky=tkinter.E)
@@ -710,7 +713,14 @@ class WindowManager(object):
                 pass
         self.play_sound('open')
         self.window.protocol("WM_DELETE_WINDOW", self.on_close)
-        self.window.mainloop()
+        if self.config.area_type:
+            if self.config.area_type == 'Zipcode':
+                area_notebook.select(zipcode_frame)
+            elif self.config.area_type == 'Lat/Lon':
+                area_notebook.select(latlon_frame)
+            elif self.config.area_type == 'Manual':
+                area_notebook.select(manual_frame)
+            self.window.mainloop()
 
     @staticmethod
     def build_widget_dict(
@@ -1087,6 +1097,11 @@ class WindowManager(object):
                 self.config.__dict__[widget_label] = self._widget_dict[widget_label].get()
             self.config.save()
         return _option_setter
+
+    def _tab_switch(self, event=None):
+        area_notebook = self._widget_dict['area_notebook']
+        self.config.area_type = area_notebook.tab(area_notebook.select(), 'text')
+        self.config.save()
 
     def _update_temp_scale(self, event=None):
         if self.config.temp_scale != self._tk_variables['temp_scale'].get():
