@@ -3,18 +3,17 @@
 from __future__ import annotations
 
 
-import requests
-import random
-import datetime
-import logging
 import appdirs
-import pathlib
-import sys
+import datetime
 import json
+import logging
+import pathlib
+import random
+import requests
+import sys
+from typing import Optional, TYPE_CHECKING, Union
 
-from typing import Optional, Union, TYPE_CHECKING
-
-from .constants import WEATHER_STATES, FEATURE_WEIGHTS
+from .constants import FEATURE_WEIGHTS, WEATHER_STATES
 
 import pyzipcode
 if sys.platform == 'darwin' and hasattr(sys, 'frozen') and sys.frozen == 'macosx_app':

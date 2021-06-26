@@ -1,25 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import simpleaudio
+import datetime
 import importlib.resources as pkg_resources
+import logging
+import multiprocessing
 import platform
 import requests
-import datetime
-import multiprocessing
+import simpleaudio
 import sys
 import tkinter
 from tkinter import messagebox, scrolledtext
 import tkinter.ttk
-import webbrowser
-import logging
-
 from typing import Dict, Optional, Union
+import webbrowser
 
-from .classes import BoktaiSim, BoktaiConfig, zip_to_latlong, check_latlong, WeatherInfo,\
-    c_to_f, f_to_c
-from .constants import BOKTAI_METER, IMAGES, SOUNDS, SUN_STATES, WEATHER_STATES,\
-    WEATHER_STATES_REVERSE, LOCAL_TIMEZONE
+from .classes import BoktaiConfig, BoktaiSim, c_to_f, f_to_c, WeatherInfo, zip_to_latlong
+from .constants import BOKTAI_METER, IMAGES, LOCAL_TIMEZONE, SOUNDS, WEATHER_STATES,\
+    WEATHER_STATES_REVERSE
 from .version import __version__
 
 
@@ -38,6 +36,8 @@ class WindowManager(object):
         self._last_version = None
         self._last_temp_scale = None
         self._first_update = True
+        self._link_cursor = 'hand1'
+        self._select_link_cursor()
         self._tk_variables = {}
         self._sim_dict = {}
         self._sound_dict = {}
@@ -47,6 +47,14 @@ class WindowManager(object):
         self._init_image_paths()
         self._init_sound_dict()
         self._set_icon()
+
+    def _select_link_cursor(self) -> None:
+        if sys.platform == 'darwin':
+            self._link_cursor = 'pointinghand'
+        elif sys.platform == 'win32':
+            self._link_cursor = 'hand2'
+        else:
+            self._link_cursor = 'hand1'
 
     def _init_sound_dict(self) -> None:
         self._sound_dict = SOUNDS.copy()
@@ -213,7 +221,7 @@ class WindowManager(object):
         latlon_note_label = tkinter.Label(
             latlon_frame,
             text='Click here to find your lat/lon',
-            fg="blue", cursor="hand1", name='latlon_note_label'
+            fg="blue", cursor=self._link_cursor, name='latlon_note_label'
         )
         if self.config.lon:
             lon_entry.insert(0, self.config.lon)
@@ -1008,15 +1016,15 @@ class WindowManager(object):
         more_info_frame = tkinter.Frame(about_window, border=3, relief='ridge')
         credits_idea_pre = tkinter.Label(more_info_frame, text='Idea by Nathan Stiles of')
         credits_idea_post = tkinter.Label(
-            more_info_frame, text=f'Stiles\' Reviews', fg="blue", cursor="hand1"
+            more_info_frame, text=f'Stiles\' Reviews', fg="blue", cursor=self._link_cursor
         )
         credits_coding_pre = tkinter.Label(more_info_frame, text='Original code by')
         credits_coding_post = tkinter.Label(
-            more_info_frame, text='Connor Barthold', fg='blue', cursor='hand1'
+            more_info_frame, text='Connor Barthold', fg='blue', cursor=self._link_cursor
         )
         credits_api_pre = tkinter.Label(more_info_frame, text='Uses the free')
         credits_api_post = tkinter.Label(
-            more_info_frame, text='MetaWeather API', fg='blue', cursor='hand1'
+            more_info_frame, text='MetaWeather API', fg='blue', cursor=self._link_cursor
         )
 
         close_button = tkinter.ttk.Button(

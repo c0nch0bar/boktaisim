@@ -127,7 +127,6 @@ Pull requests are always welcome!
  - Add setting for logging verbosity
  - Make Fahrenheit/Celsius handling more sane
  - refactor tkinter code, it's a mess
- - fix slight offset between filled and empty bars (where is it coming from?)
  - standardize "lat/lon", "lat/long", etc.
  - rewrite `__str__` for `BoktaiSim`
  - Support for console mode
