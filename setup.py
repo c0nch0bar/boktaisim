@@ -20,6 +20,13 @@ except ImportError:
 
 exec(open('boktaisim/version.py').read())
 
+data_file_paths = glob('resources/*.wav')
+data_file_paths.extend(glob('resources/*.gif'))
+data_file_paths.extend(glob('resources/*.db'))
+DATA_FILES = [
+    ('resources', data_file_paths),
+]
+
 if sys.platform == 'darwin':
     extra_options = dict(
          setup_requires=['py2app'],
@@ -34,9 +41,18 @@ if sys.platform == 'darwin':
          ),
     )
 elif sys.platform == 'win32':
+    import py2exe
     extra_options = dict(
-         setup_requires=['py2exe'],
-         app=['boktaisim.py']
+        setup_requires=['py2exe'],
+        windows=[
+            {
+                "script": "boktaisim.py",
+                "icon_resources": [(1, "boktaisim/resources/boktaisim_icon.ico")]
+            }
+        ],
+        py2exe={
+            "includes": "boktaisim.resources"
+        }
     )
 else:
     extra_options = dict(
@@ -44,14 +60,6 @@ else:
          # and install the main script as such
          scripts=['boktaisim.py'],
     )
-
-data_file_paths = glob('resources/*.wav')
-data_file_paths.extend(glob('resources/*.gif'))
-data_file_paths.extend(glob('resources/*.csv'))
-data_file_paths.extend(glob('resources/*.db'))
-DATA_FILES = [
-    ('resources', data_file_paths),
-]
 
 setup(
     name='boktaisim',
@@ -90,7 +98,7 @@ setup(
         'console_scripts': ['boktaisim=boktaisim.boktaisim:main'],
     },
     include_package_data=True,
-    package_data={'': ['resources/*.gif', 'resources/*.wav', 'resources/*.csv', 'resources/*.db']},
+    package_data={'': ['resources/*.gif', 'resources/*.wav', 'resources/*.db']},
     data_files=DATA_FILES,
     **extra_options
 )
