@@ -197,7 +197,7 @@ class WeatherInfo(object):
         self._raw_data = weather_json
         latest_weather = weather_json['consolidated_weather'][-1]
         self.timestamp = latest_weather['created']
-        self.sunrise = weather_json['sun_set']
+        self.sunrise = weather_json['sun_rise']
         self.sunset = weather_json['sun_set']
         self.weather_state = latest_weather['weather_state_abbr']
         self.min_temp = latest_weather['min_temp']
@@ -286,7 +286,7 @@ class WeatherInfo(object):
             current_temp=latest_weather['the_temp'],
             visibility=latest_weather['visibility'],
             weather_state=latest_weather['weather_state_abbr'],
-            sunrise=weather_json['sun_set'],
+            sunrise=weather_json['sun_rise'],
             sunset=weather_json['sun_set'],
             timestamp=latest_weather['created'],
             raw_weather_data=weather_json,
