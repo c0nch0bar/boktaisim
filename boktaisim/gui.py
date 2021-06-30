@@ -746,7 +746,7 @@ class WindowManager(object):
                 area_notebook.select(latlon_frame)
             elif self.config.area_type == 'Manual':
                 area_notebook.select(manual_frame)
-            self.window.mainloop()
+        self.window.mainloop()
 
     @staticmethod
     def build_widget_dict(
