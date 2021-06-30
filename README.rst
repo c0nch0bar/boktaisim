@@ -170,7 +170,6 @@ Pull requests are always welcome!
 
  - Better code documentation
  - UI Scaling
- - Add setting for logging verbosity
  - Make Fahrenheit/Celsius handling more sane
  - refactor tkinter code, it's a mess
  - standardize "lat/lon", "lat/long", etc.

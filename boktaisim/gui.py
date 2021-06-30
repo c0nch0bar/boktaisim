@@ -27,10 +27,10 @@ class WindowManager(object):
             config_file: Optional[str] = None
     ):
         self.logger = logging.getLogger()
-        self.logger.setLevel(logging.DEBUG)
         self.window = tkinter.Tk()
         self.boktaisim: Optional[BoktaiSim] = None
         self.config = BoktaiConfig.from_json(config_file)
+        self.logger.setLevel(logging._nameToLevel[self.config.logging_level])
         self._current_theme = None
         self._last_value = None
         self._last_version = None
@@ -541,6 +541,26 @@ class WindowManager(object):
             value='C',
             name='celsuis_radio'
         )
+        theme_logging_separator = tkinter.ttk.Separator(options_frame)
+        logging_level_frame = tkinter.Frame(options_frame, name='logging_level_frame')
+        self._tk_variables['logging_level'] = tkinter.StringVar()
+        if self.config.theme:
+            self._tk_variables['logging_level'].set(self.config.logging_level)
+        logging_level_label = tkinter.Label(
+            logging_level_frame, text='Logging Level:', name='logging_level_label'
+        )
+        logging_level_option = tkinter.ttk.OptionMenu(
+            logging_level_frame,
+            self._tk_variables['logging_level'],
+            self._tk_variables['logging_level'].get(),
+            'CRITICAL',
+            'ERROR',
+            'WARNING',
+            'INFO',
+            'DEBUG',
+            style='custom.TButton',
+            command=self._update_logging_level
+        )
 
         if self.config.lunar_mode:
             self._tk_variables['lunar_mode'].set(1)
@@ -680,12 +700,14 @@ class WindowManager(object):
         api_update_timer_header.grid(column=0, row=0, columnspan=2)
         api_update_timer_slider.grid(column=0, row=1)
         api_update_timer_label.grid(column=1, row=1)
-        api_update_mute_separator.grid(column=0, row=3, columnspan=2, sticky=tkinter.EW, pady=(5, 5))
+        api_update_mute_separator.grid(
+            column=0, row=3, columnspan=2, sticky=tkinter.EW, pady=(5, 5)
+        )
         mute_frame.grid(column=0, row=4, columnspan=2, padx=(10, 10))
         mute_flavor_checkbutton.grid(column=0, row=0, columnspan=2, padx=(5, 5))
         mute_alert_checkbutton.grid(column=2, row=0, columnspan=2, padx=(5, 5))
-        alert_sound_label.grid(column=2, row=1)
-        alert_sound_option.grid(column=3, row=1)
+        alert_sound_label.grid(column=0, row=1, columnspan=2, sticky=tkinter.E)
+        alert_sound_option.grid(column=2, row=1, columnspan=2, sticky=tkinter.W)
         mute_lunar_mode_separator.grid(column=0, row=5, columnspan=2, sticky=tkinter.EW, pady=(5, 5))
         lunar_mode_checkbutton.grid(column=0, row=6, columnspan=2)
         lunar_mode_notes_label.grid(column=0, row=7, columnspan=2)
@@ -696,6 +718,10 @@ class WindowManager(object):
         temp_scale_frame.grid(column=2, row=0, columnspan=2, padx=(10, 10))
         fahrenheit_radio.grid(column=0, row=0, sticky=tkinter.W)
         celsuis_radio.grid(column=1, row=0, sticky=tkinter.E)
+        theme_logging_separator.grid(column=0, row=10, columnspan=2, sticky=tkinter.EW, pady=(5, 5))
+        logging_level_frame.grid(column=0, row=11, columnspan=2, padx=(10, 10))
+        logging_level_label.grid(column=0, row=0, sticky=tkinter.E)
+        logging_level_option.grid(column=1, row=0, sticky=tkinter.W)
 
         logging_frame.columnconfigure(0, weight=1)
         logging_frame.rowconfigure(0, weight=1)
@@ -1180,7 +1206,16 @@ class WindowManager(object):
     def _update_theme(self, event=None):
         tkinter.ttk.Style().theme_use(self._tk_variables['theme'].get())
         self.config.theme = self._tk_variables['theme'].get()
+        self.logger.debug(f'Updating theme to `{self.config.theme}`')
+        self.config.save()
+
+    def _update_logging_level(self, event=None):
+        logging_level = self._tk_variables['logging_level'].get()
+        if logging_level != self.config.logging_level:
+            self.logger.debug(f'Setting log level to `{logging_level}`')
+            self.logger.setLevel(logging._nameToLevel[logging_level])
         self.logger.info(f'Updating theme to `{self.config.theme}`')
+        self.config.logging_level = logging_level
         self.config.save()
 
     def _set_alert_sound(self, event=None):

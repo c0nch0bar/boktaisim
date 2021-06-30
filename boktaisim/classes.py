@@ -77,6 +77,7 @@ class BoktaiConfig(object):
             theme: Optional[str] = 'default',
             temp_scale: Optional[str] = 'F',
             alert_sound_option: Optional[str] = 'chime1',
+            logging_level: Optional[str] = 'INFO',
             config_file: Optional[str] = None
     ) -> None:
         self.gui_update_interval = gui_update_interval
@@ -98,6 +99,7 @@ class BoktaiConfig(object):
         self.theme = theme
         self.temp_scale = temp_scale
         self.alert_sound_option = alert_sound_option
+        self.logging_level = logging_level
         if config_file is None:
             config_file = str(
                 pathlib.Path(
