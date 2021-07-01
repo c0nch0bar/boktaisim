@@ -247,28 +247,37 @@ class WindowManager(object):
         min_f_label = tkinter.Label(
             manual_frame, text=f'Min °{self.config.temp_scale}: ', name='min_f_label'
         )
+        min_f = None
+        avg_f = None
+        max_f = None
         if self.config.temp_scale == 'C':
-            min_f = round(f_to_c(self.config.min_f), 2)
-            avg_f = round(f_to_c(self.config.avg_f), 2)
-            max_f = round(f_to_c(self.config.max_f), 2)
+            if self.config.min_f:
+                min_f = round(f_to_c(self.config.min_f), 2)
+            if self.config.avg_f:
+                avg_f = round(f_to_c(self.config.avg_f), 2)
+            if self.config.max_f:
+                max_f = round(f_to_c(self.config.max_f), 2)
         else:
-            min_f = self.config.min_f
-            avg_f = self.config.avg_f
-            max_f = self.config.max_f
+            if self.config.min_f:
+                min_f = self.config.min_f
+            if self.config.avg_f:
+                avg_f = self.config.avg_f
+            if self.config.max_f:
+                max_f = self.config.max_f
         min_f_entry = tkinter.Entry(manual_frame, width=4, name='min_f_entry')
-        if self.config.min_f:
+        if min_f:
             min_f_entry.insert(0, min_f)
         avg_f_label = tkinter.Label(
             manual_frame, text=f'Avg °{self.config.temp_scale}: ', name='avg_f_label'
         )
         avg_f_entry = tkinter.Entry(manual_frame, width=4, name='avg_f_entry')
-        if self.config.avg_f:
+        if avg_f:
             avg_f_entry.insert(0, avg_f)
         max_f_label = tkinter.Label(
             manual_frame, text=f'Max °{self.config.temp_scale}: ', name='max_f_label'
         )
         max_f_entry = tkinter.Entry(manual_frame, width=4, name='max_f_entry')
-        if self.config.max_f:
+        if max_f:
             max_f_entry.insert(0, max_f)
         weather_state_frame = tkinter.Frame(manual_frame, name='weather_state_frame')
         weather_state_entry_label = tkinter.Label(
@@ -834,6 +843,11 @@ class WindowManager(object):
             self.config.lon = self._widget_dict['lon_entry'].get()
             latlong = f'{self.config.lat},{self.config.lon}'
         elif current_location_tab == 'Manual':
+            if not (self._widget_dict['min_f_entry'].get() and
+                    self._widget_dict['avg_f_entry'].get() and
+                    self._widget_dict['max_f_entry'].get()):
+                self.alert('warning', 'All fields must be filled when in Manual mode!')
+                return
             if self.config.temp_scale == 'C':
                 try:
                     self.config.min_f = c_to_f(self._widget_dict['min_f_entry'].get())
@@ -1193,37 +1207,43 @@ class WindowManager(object):
                     text=f'Max °F: '
                 )
             if self.config.temp_scale == 'F':
-                min_f = round(c_to_f(self._widget_dict['min_f_entry'].get()), 2)
-                self._widget_dict['min_f_entry'].delete(0, tkinter.END)
-                self._widget_dict['min_f_entry'].insert(
-                    0, min_f
-                )
-                avg_f = round(c_to_f(self._widget_dict['avg_f_entry'].get()), 2)
-                self._widget_dict['avg_f_entry'].delete(0, tkinter.END)
-                self._widget_dict['avg_f_entry'].insert(
-                    0, avg_f
-                )
-                max_f = round(c_to_f(self._widget_dict['max_f_entry'].get()), 2)
-                self._widget_dict['max_f_entry'].delete(0, tkinter.END)
-                self._widget_dict['max_f_entry'].insert(
-                    0, max_f
-                )
+                if self._widget_dict['min_f_entry'].get():
+                    min_f = round(c_to_f(self._widget_dict['min_f_entry'].get()), 2)
+                    self._widget_dict['min_f_entry'].delete(0, tkinter.END)
+                    self._widget_dict['min_f_entry'].insert(
+                        0, min_f
+                    )
+                if self._widget_dict['avg_f_entry'].get():
+                    avg_f = round(c_to_f(self._widget_dict['avg_f_entry'].get()), 2)
+                    self._widget_dict['avg_f_entry'].delete(0, tkinter.END)
+                    self._widget_dict['avg_f_entry'].insert(
+                        0, avg_f
+                    )
+                if self._widget_dict['max_f_entry'].get():
+                    max_f = round(c_to_f(self._widget_dict['max_f_entry'].get()), 2)
+                    self._widget_dict['max_f_entry'].delete(0, tkinter.END)
+                    self._widget_dict['max_f_entry'].insert(
+                        0, max_f
+                    )
             if self.config.temp_scale == 'C':
-                min_f = round(f_to_c(self._widget_dict['min_f_entry'].get()), 2)
-                self._widget_dict['min_f_entry'].delete(0, tkinter.END)
-                self._widget_dict['min_f_entry'].insert(
-                    0, min_f
-                )
-                avg_f = round(f_to_c(self._widget_dict['avg_f_entry'].get()), 2)
-                self._widget_dict['avg_f_entry'].delete(0, tkinter.END)
-                self._widget_dict['avg_f_entry'].insert(
-                    0, avg_f
-                )
-                max_f = round(f_to_c(self._widget_dict['max_f_entry'].get()), 2)
-                self._widget_dict['max_f_entry'].delete(0, tkinter.END)
-                self._widget_dict['max_f_entry'].insert(
-                    0, max_f
-                )
+                if self._widget_dict['min_f_entry'].get():
+                    min_f = round(f_to_c(self._widget_dict['min_f_entry'].get()), 2)
+                    self._widget_dict['min_f_entry'].delete(0, tkinter.END)
+                    self._widget_dict['min_f_entry'].insert(
+                        0, min_f
+                    )
+                if self._widget_dict['avg_f_entry'].get():
+                    avg_f = round(f_to_c(self._widget_dict['avg_f_entry'].get()), 2)
+                    self._widget_dict['avg_f_entry'].delete(0, tkinter.END)
+                    self._widget_dict['avg_f_entry'].insert(
+                        0, avg_f
+                    )
+                if self._widget_dict['max_f_entry'].get():
+                    max_f = round(f_to_c(self._widget_dict['max_f_entry'].get()), 2)
+                    self._widget_dict['max_f_entry'].delete(0, tkinter.END)
+                    self._widget_dict['max_f_entry'].insert(
+                        0, max_f
+                    )
 
     def _update_theme(self, event=None):
         tkinter.ttk.Style().theme_use(self._tk_variables['theme'].get())
