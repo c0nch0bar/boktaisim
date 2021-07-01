@@ -23,6 +23,7 @@ exec(open('boktaisim/version.py').read())
 data_file_paths = glob('resources/*.wav')
 data_file_paths.extend(glob('resources/*.gif'))
 data_file_paths.extend(glob('resources/*.db'))
+data_file_paths.extend(glob('resources/*.ico'))
 DATA_FILES = [
     ('resources', data_file_paths),
 ]
@@ -50,9 +51,13 @@ elif sys.platform == 'win32':
                 "icon_resources": [(1, "boktaisim/resources/boktaisim_icon.ico")]
             }
         ],
-        py2exe={
-            "includes": "boktaisim.resources"
-        }
+        options={
+            'py2exe': {
+                "packages": ["boktaisim.resources"],
+                "bundle_files": 1
+            }
+        },
+        zipfile=None
     )
 else:
     extra_options = dict(

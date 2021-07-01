@@ -18,8 +18,8 @@ from .constants import FEATURE_WEIGHTS, WEATHER_STATES
 import pyzipcode
 if sys.platform == 'darwin' and hasattr(sys, 'frozen') and sys.frozen == 'macosx_app':
     pyzipcode.db_location = 'zipcodes.db'
-elif sys.platform == 'win32':
-    pass
+elif sys.platform == 'win32' and hasattr(sys, 'frozen'):
+    pyzipcode.db_location = 'resources/zipcodes.db'
 else:
     pass
 

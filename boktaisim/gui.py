@@ -5,10 +5,13 @@ import datetime
 import importlib.resources as pkg_resources
 import logging
 import multiprocessing
+import os
+import pathlib
 import platform
 import requests
 import simpleaudio
 import sys
+import time
 import tkinter
 from tkinter import messagebox, scrolledtext
 import tkinter.ttk
@@ -19,6 +22,10 @@ from .classes import BoktaiConfig, BoktaiSim, c_to_f, f_to_c, WeatherInfo, zip_t
 from .constants import BOKTAI_METER, IMAGES, LOCAL_TIMEZONE, SOUNDS, WEATHER_STATES,\
     WEATHER_STATES_REVERSE
 from .version import __version__
+
+
+if sys.platform == 'win32' and hasattr(sys, 'frozen'):
+    os.chdir(str(pathlib.Path(sys.executable).parent))
 
 
 class WindowManager(object):
@@ -58,26 +65,38 @@ class WindowManager(object):
 
     def _init_sound_dict(self) -> None:
         self._sound_dict = SOUNDS.copy()
-        for sound_name, sound_data in SOUNDS.items():
-            if not sound_data:
-                self._sound_dict[sound_name] = None
-                continue
-            with pkg_resources.path('boktaisim.resources', sound_data['file']) as sound_path:
+        if sys.platform == 'win32' and hasattr(sys, 'frozen'):
+            for sound_name, sound_data in SOUNDS.items():
+                if not sound_data:
+                    self._sound_dict[sound_name] = None
+                    continue
+                sound_path = f'resources/{sound_data["file"]}'
                 audio_segment = simpleaudio.WaveObject.from_wave_file(str(sound_path))
                 self._sound_dict[sound_name]['segment'] = audio_segment
-        self._sound_dict['bar_update']['file'] = f'{self.config.alert_sound_option}.wav'
-        with pkg_resources.path(
-                'boktaisim.resources', f'{self.config.alert_sound_option}.wav'
-        ) as sound_path:
-            audio_segment = simpleaudio.WaveObject.from_wave_file(str(sound_path))
+            self._sound_dict['bar_update']['file'] = f'resources/{self.config.alert_sound_option}.wav'
+            audio_segment = simpleaudio.WaveObject.from_wave_file(self._sound_dict['bar_update']['file'])
             self._sound_dict['bar_update']['segment'] = audio_segment
+        else:
+            for sound_name, sound_data in SOUNDS.items():
+                if not sound_data:
+                    self._sound_dict[sound_name] = None
+                    continue
+                with pkg_resources.path('boktaisim.resources', sound_data['file']) as sound_path:
+                    audio_segment = simpleaudio.WaveObject.from_wave_file(str(sound_path))
+                    self._sound_dict[sound_name]['segment'] = audio_segment
+            self._sound_dict['bar_update']['file'] = f'{self.config.alert_sound_option}.wav'
+            with pkg_resources.path(
+                    'boktaisim.resources', f'{self.config.alert_sound_option}.wav'
+            ) as sound_path:
+                audio_segment = simpleaudio.WaveObject.from_wave_file(str(sound_path))
+                self._sound_dict['bar_update']['segment'] = audio_segment
 
     def _init_image_paths(self) -> None:
         for image_name in IMAGES:
             if sys.platform == 'darwin' and hasattr(sys, 'frozen') and sys.frozen == 'macosx_app':
                 self._imgs[image_name] = image_name
             elif sys.platform == 'win32' and hasattr(sys, 'frozen'):
-                pass
+                self._imgs[image_name] = f'resources/{image_name}'
             else:
                 with pkg_resources.path('boktaisim.resources', image_name) as image_path:
                     self._imgs[image_name] = image_path
@@ -771,6 +790,7 @@ class WindowManager(object):
         self.logger.info('Quitting')
         self.play_sound('close')
         self.window.destroy()
+        time.sleep(3)
 
     def do_update(self) -> None:
         logging.debug('Performing update')
@@ -1131,6 +1151,8 @@ class WindowManager(object):
 
     def _update_temp_scale(self, event=None):
         if self.config.temp_scale != self._tk_variables['temp_scale'].get():
+            if not self.boktaisim:
+                return
             self.config.temp_scale = self._tk_variables['temp_scale'].get()
             if self.config.temp_scale == 'C':
                 self._widget_dict['min_temp_label'].configure(
@@ -1220,10 +1242,15 @@ class WindowManager(object):
 
     def _set_alert_sound(self, event=None):
         selection = self._tk_variables["alert_sound_option"].get()
-        with pkg_resources.path('boktaisim.resources', f'{selection}.wav') as sound_path:
-            audio_segment = simpleaudio.WaveObject.from_wave_file(str(sound_path))
+        if sys.platform == 'win32' and hasattr(sys, 'frozen'):
+            audio_segment = simpleaudio.WaveObject.from_wave_file(f'resources/{selection}.wav')
             self._sound_dict['bar_update']['segment'] = audio_segment
-            self._sound_dict['bar_update']['file'] = f'{selection}.wav'
+            self._sound_dict['bar_update']['file'] = f'resources/{selection}.wav'
+        else:
+            with pkg_resources.path('boktaisim.resources', f'{selection}.wav') as sound_path:
+                audio_segment = simpleaudio.WaveObject.from_wave_file(str(sound_path))
+                self._sound_dict['bar_update']['segment'] = audio_segment
+                self._sound_dict['bar_update']['file'] = f'{selection}.wav'
         self.play_sound('bar_update')
         self.config.alert_sound_option = selection
         self.config.save()
