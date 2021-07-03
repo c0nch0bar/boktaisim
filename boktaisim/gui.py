@@ -1044,10 +1044,10 @@ class WindowManager(object):
         self._last_value = bar_value
         self.config.save()
 
-    def alert(self, level: str, msg: str):
+    def alert(self, level: str, msg: str) -> None:
         self.play_sound(level)
         messagebox.showwarning(level, msg)
-        logging.log(logging._nameToLevel[level.upper()], msg)
+        self.logger.log(logging._nameToLevel[level.upper()], msg)
 
     def timed_update(self) -> None:
         self.logger.info('Performing timed update')
@@ -1163,7 +1163,7 @@ class WindowManager(object):
         self.config.area_type = area_notebook.tab(area_notebook.select(), 'text')
         self.config.save()
 
-    def _update_temp_scale(self, event=None):
+    def _update_temp_scale(self, event=None) -> None:
         if self.config.temp_scale != self._tk_variables['temp_scale'].get():
             if not self.boktaisim:
                 return
@@ -1245,13 +1245,13 @@ class WindowManager(object):
                         0, max_f
                     )
 
-    def _update_theme(self, event=None):
+    def _update_theme(self, event=None) -> None:
         tkinter.ttk.Style().theme_use(self._tk_variables['theme'].get())
         self.config.theme = self._tk_variables['theme'].get()
         self.logger.debug(f'Updating theme to `{self.config.theme}`')
         self.config.save()
 
-    def _update_logging_level(self, event=None):
+    def _update_logging_level(self, event=None) -> None:
         logging_level = self._tk_variables['logging_level'].get()
         if logging_level != self.config.logging_level:
             self.logger.debug(f'Setting log level to `{logging_level}`')
@@ -1260,7 +1260,7 @@ class WindowManager(object):
         self.config.logging_level = logging_level
         self.config.save()
 
-    def _set_alert_sound(self, event=None):
+    def _set_alert_sound(self, event=None) -> None:
         selection = self._tk_variables["alert_sound_option"].get()
         if sys.platform == 'win32' and hasattr(sys, 'frozen'):
             audio_segment = simpleaudio.WaveObject.from_wave_file(f'resources/{selection}.wav')
@@ -1294,7 +1294,7 @@ class WindowManager(object):
         return None
 
     @property
-    def version(self):
+    def version(self) -> int:
         return self.config.version
 
     @version.setter
@@ -1303,12 +1303,11 @@ class WindowManager(object):
         self.config.version = value
 
     @property
-    def lunar_mode(self):
+    def lunar_mode(self) -> bool:
         return self.config.lunar_mode
 
     @lunar_mode.setter
-    def lunar_mode(self, value):
-        assert isinstance(value, bool)
+    def lunar_mode(self, value: bool) -> None:
         self.config.lunar_mode = value
 
 
