@@ -1290,72 +1290,74 @@ class WindowManager(object):
             image=self._image_containers[f'bt{self.version}_logo'].tkimage
         )
 
-    def _resize_window(self, event=None) -> None:
-        if isinstance(event.widget, tkinter.Tk):
-            if self._last_win_size == f'{event.width}x{event.height}':
-                return
-            self._last_win_size = f'{event.width}x{event.height}'
-            self._update_bar()
-            self._update_logo()
-            win_height = event.height
-            win_width = event.width
-            main_font_height = round(3 * win_height / 100)
-            caption_font_height = round(2 * win_height / 100)
-            self._main_font['size'] = main_font_height
-            self._caption_font['size'] = caption_font_height
-            for label, widget in self._widget_dict.items():
-                if (
-                        isinstance(widget, tkinter.Label) or
-                        isinstance(widget, tkinter.Scale) or
-                        isinstance(widget, tkinter.Radiobutton) or
-                        isinstance(widget, tkinter.Entry)
-                ) and widget.cget('font') in ['TkDefaultFont', 'TkTextFont', 'font1']:
-                    widget.configure(font=self._main_font)
-                if isinstance(widget, tkinter.Label) and \
-                        widget.cget('font') == 'TkSmallCaptionFont':
-                    widget.configure(font=self._caption_font)
-                if isinstance(widget, tkinter.Scale):
-                    length = round(40 * win_width / 100)
-                    widget.configure(length=length)
-                if isinstance(widget, tkinter.ttk.Button):
-                    style = tkinter.ttk.Style()
-                    style.configure(
-                        'custom.TButton',
-                        font=('TkDefaultFont', main_font_height)
-                    )
-                if isinstance(widget, tkinter.ttk.Radiobutton):
-                    style = tkinter.ttk.Style()
-                    style.configure(
-                        'custom.TRadiobutton',
-                        font=('TkDefaultFont', main_font_height)
-                    )
-                if isinstance(widget, tkinter.ttk.Checkbutton):
-                    style = tkinter.ttk.Style()
-                    style.configure(
-                        'custom.TCheckbutton',
-                        font=('TkDefaultFont', main_font_height)
-                    )
-                if isinstance(widget, tkinter.ttk.Combobox):
-                    style = tkinter.ttk.Style()
-                    style.configure(
-                        'custom.TCombobox',
-                        font=('TkDefaultFont', main_font_height)
-                    )
-                if isinstance(widget, tkinter.ttk.Notebook):
-                    style = tkinter.ttk.Style()
-                    style.configure(
-                        'custom.TNotebook.Tab',
-                        font=('TkDefaultFont', main_font_height)
-                    )
-                    style = tkinter.ttk.Style()
-                    style.configure(
-                        'centered.TNotebook.Tab',
-                        font=('TkDefaultFont', main_font_height)
-                    )
-                    style.configure(
-                        'centered.TNotebook',
-                        tabposition='n'
-                    )
+    def _resize_window(self, event: tkinter.Event) -> None:
+        if not isinstance(event.widget, tkinter.Tk):
+            return
+        if self._last_win_size == f'{event.width}x{event.height}' and not \
+                hasattr(event, '_theme_switch'):
+            return
+        self._last_win_size = f'{event.width}x{event.height}'
+        self._update_bar()
+        self._update_logo()
+        win_height = event.height
+        win_width = event.width
+        main_font_height = round(3 * win_height / 100)
+        caption_font_height = round(2 * win_height / 100)
+        self._main_font['size'] = main_font_height
+        self._caption_font['size'] = caption_font_height
+        for label, widget in self._widget_dict.items():
+            if (
+                    isinstance(widget, tkinter.Label) or
+                    isinstance(widget, tkinter.Scale) or
+                    isinstance(widget, tkinter.Radiobutton) or
+                    isinstance(widget, tkinter.Entry)
+            ) and widget.cget('font') in ['TkDefaultFont', 'TkTextFont', 'font1']:
+                widget.configure(font=self._main_font)
+            if isinstance(widget, tkinter.Label) and \
+                    widget.cget('font') == 'TkSmallCaptionFont':
+                widget.configure(font=self._caption_font)
+            if isinstance(widget, tkinter.Scale):
+                length = round(40 * win_width / 100)
+                widget.configure(length=length)
+            if isinstance(widget, tkinter.ttk.Button):
+                style = tkinter.ttk.Style()
+                style.configure(
+                    'custom.TButton',
+                    font=('TkDefaultFont', main_font_height)
+                )
+            if isinstance(widget, tkinter.ttk.Radiobutton):
+                style = tkinter.ttk.Style()
+                style.configure(
+                    'custom.TRadiobutton',
+                    font=('TkDefaultFont', main_font_height)
+                )
+            if isinstance(widget, tkinter.ttk.Checkbutton):
+                style = tkinter.ttk.Style()
+                style.configure(
+                    'custom.TCheckbutton',
+                    font=('TkDefaultFont', main_font_height)
+                )
+            if isinstance(widget, tkinter.ttk.Combobox):
+                style = tkinter.ttk.Style()
+                style.configure(
+                    'custom.TCombobox',
+                    font=('TkDefaultFont', main_font_height)
+                )
+            if isinstance(widget, tkinter.ttk.Notebook):
+                style = tkinter.ttk.Style()
+                style.configure(
+                    'custom.TNotebook.Tab',
+                    font=('TkDefaultFont', main_font_height)
+                )
+                style = tkinter.ttk.Style()
+                style.configure(
+                    'centered.TNotebook.Tab',
+                    font=('TkDefaultFont', main_font_height)
+                )
+                style.configure(
+                    'centered.TNotebook',
+                    tabposition='n'
+                )
 
     def _tab_switch(self, event: Optional[tkinter.Event] = None) -> None:
         if event:
@@ -1453,6 +1455,13 @@ class WindowManager(object):
             self.logger.debug(f'Received event {event}')
         tkinter.ttk.Style().theme_use(self._tk_variables['theme'].get())
         self.config.theme = self._tk_variables['theme'].get()
+        """ VERY hacky way of doing this, should probably fix it in teh future. """
+        event = tkinter.Event()
+        event.__dict__['widget'] = self.window
+        event.__dict__['width'] = self.window.winfo_width()
+        event.__dict__['height'] = self.window.winfo_height()
+        event.__dict__['_theme_switch'] = True
+        self._resize_window(event)
         self.logger.debug(f'Updating theme to `{self.config.theme}`')
         self.config.save()
 
