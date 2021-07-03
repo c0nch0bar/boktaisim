@@ -164,12 +164,11 @@ To-Do
 
 Pull requests are always welcome!
 
- - Overheat for alerts (graphic)
  - Graphs for all possible combinations for testing
  - Add horizontal scrollbar to logging window
 
+ - Update bar on version selection
  - Better code documentation
- - UI Scaling
  - Make Fahrenheit/Celsius handling more sane
  - refactor tkinter code, it's a mess
  - standardize "lat/lon", "lat/long", etc.

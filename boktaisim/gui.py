@@ -7,13 +7,14 @@ import logging
 import multiprocessing
 import os
 import pathlib
+from PIL import Image, ImageTk
 import platform
 import requests
 import simpleaudio
 import sys
 import time
 import tkinter
-from tkinter import messagebox, scrolledtext
+from tkinter import font, messagebox, scrolledtext
 import tkinter.ttk
 from typing import Dict, Optional, Union
 import webbrowser
@@ -44,13 +45,17 @@ class WindowManager(object):
         self._last_temp_scale = None
         self._first_update = True
         self._link_cursor = 'hand1'
-        self._select_link_cursor()
+        self._main_font = None
+        self._caption_font = None
+        self._last_win_size = ''
+        self._canvas_width = 0
+        self._image_containers: Dict[str, ImageHandler] = {}
         self._tk_variables = {}
         self._sim_dict = {}
         self._sound_dict = {}
         self._widget_dict = {}
         self._imgs = {}
-        self._pil_imgs = {}
+        self._select_link_cursor()
         self._init_image_paths()
         self._init_sound_dict()
         self._set_icon()
@@ -73,8 +78,11 @@ class WindowManager(object):
                 sound_path = f'resources/{sound_data["file"]}'
                 audio_segment = simpleaudio.WaveObject.from_wave_file(str(sound_path))
                 self._sound_dict[sound_name]['segment'] = audio_segment
-            self._sound_dict['bar_update']['file'] = f'resources/{self.config.alert_sound_option}.wav'
-            audio_segment = simpleaudio.WaveObject.from_wave_file(self._sound_dict['bar_update']['file'])
+            self._sound_dict['bar_update']['file'] = \
+                f'resources/{self.config.alert_sound_option}.wav'
+            audio_segment = simpleaudio.WaveObject.from_wave_file(
+                self._sound_dict['bar_update']['file']
+            )
             self._sound_dict['bar_update']['segment'] = audio_segment
         else:
             for sound_name, sound_data in SOUNDS.items():
@@ -115,19 +123,23 @@ class WindowManager(object):
             self.window.iconbitmap(self._imgs["boktaisim_icon.xbm"])
 
     def main(self, pipe: Optional[multiprocessing.Pipe] = None) -> None:
+        self._main_font = font.Font(self.window, family='TkDefaultFont')
+        self._caption_font = font.Font(self.window, family='TkSmallCaptionFont')
         self.window.geometry('405x480')
         self.window.minsize(405, 480)
-        self.window.maxsize()
+        self.window.bind('<Configure>', self._resize_window)
         style = tkinter.ttk.Style(self.window)
-        # style.theme_create("boktai", settings={})
         hours = list(range(0, 24))
         minutes = list(range(0, 60))
 
         style.theme_use("classic")
         self.window.configure(bg='#ECECEC')
         tkinter.ttk.Style().configure('custom.TButton', foreground='black', background='#ECECEC')
-        tkinter.ttk.Style().configure('bottomtab.TNotebook', tabposition='s')
+        tkinter.ttk.Style().configure('custom.TRadiobutton', foreground='black')
+        tkinter.ttk.Style().configure('custom.TCheckbutton', foreground='black')
         tkinter.ttk.Style().configure('centered.TNotebook', tabposition='n')
+        tkinter.ttk.Style().configure('custom.TNotebook')
+        tkinter.ttk.Style().configure('custom.TCombobox')
 
         style.theme_create(
             "boktai",
@@ -157,7 +169,9 @@ class WindowManager(object):
 
         self.window.title('Stiles\' Solar Sensor Simulator for the Boktai Trilogy')
         tkinter.ttk.Style().theme_use(self.config.theme)
-        master_notebook = tkinter.ttk.Notebook(self.window, name='master_notebook')
+        master_notebook = tkinter.ttk.Notebook(
+            self.window, style='custom.TNotebook', name='master_notebook'
+        )
         simulator_frame = tkinter.Frame(master_notebook, name='simulator_frame')
         options_frame = tkinter.Frame(master_notebook, padx=10, pady=10, name='options_frame')
         logging_frame = tkinter.Frame(master_notebook, name='logging_frame')
@@ -181,20 +195,26 @@ class WindowManager(object):
         simulator_frame.bind('<Return>', self.do_update)
 
         middle_spacing_label = tkinter.Label(simulator_frame, text=" ", name='middle_spacing_label')
-        boktai1_img = tkinter.PhotoImage(file=self._imgs["boktai1_logo.gif"])
-        boktai1_logo = tkinter.Label(
-            simulator_frame, image=boktai1_img, bg='#ECECEC', highlightbackground='#ECECEC',
-            name='boktai1_logo'
+        self._image_containers['bt1_logo'] = ImageHandler.from_file(
+            file_path=self._imgs["boktai1_logo.gif"],
+            version=1,
+            parent=simulator_frame,
+            name='boktai1_logo',
+            container_type='Label'
         )
-        boktai_2_img = tkinter.PhotoImage(file=self._imgs["boktai2_logo.gif"])
-        boktai_2_logo = tkinter.Label(
-            simulator_frame, image=boktai_2_img, bg='#ECECEC', highlightbackground='#ECECEC',
-            name='boktai2_logo'
+        self._image_containers['bt2_logo'] = ImageHandler.from_file(
+            file_path=self._imgs["boktai2_logo.gif"],
+            version=2,
+            parent=simulator_frame,
+            name='boktai2_logo',
+            container_type='Label'
         )
-        boktai_3_img = tkinter.PhotoImage(file=self._imgs["boktai3_logo.gif"])
-        boktai_3_logo = tkinter.Label(
-            simulator_frame, image=boktai_3_img, bg='#ECECEC', highlightbackground='#ECECEC',
-            name='boktai3_logo'
+        self._image_containers['bt3_logo'] = ImageHandler.from_file(
+            file_path=self._imgs["boktai3_logo.gif"],
+            version=3,
+            parent=simulator_frame,
+            name='boktai3_logo',
+            container_type='Label'
         )
         area_notebook = tkinter.ttk.Notebook(
             simulator_frame, style='centered.TNotebook', name='area_notebook'
@@ -210,7 +230,7 @@ class WindowManager(object):
             version_and_submit_frame, text="Boktai: ", name='version_label'
         )
         version_combo = tkinter.ttk.Combobox(
-            version_and_submit_frame,  width=2, name='version_combo'
+            version_and_submit_frame,  width=2, style='custom.TCombobox', name='version_combo'
         )
         version_combo['values'] = (1, 2, 3)
         version_combo.current(self.config.version - 1)
@@ -395,53 +415,59 @@ class WindowManager(object):
             image=sun_state_icon, compound=tkinter.RIGHT
         )
         boktai_meter_frame = tkinter.Frame(simulator_frame, width=274, name='boktai_meter_frame')
-        boktai1_meter_bg_img = tkinter.PhotoImage(
-            file=self._imgs["boktai1_meter_empty.gif"]
+        self._image_containers['bt1meter_bg'] = ImageHandler.from_file(
+            file_path=self._imgs["boktai1_meter_empty.gif"],
+            version=1,
+            parent=boktai_meter_frame,
+            name='boktai1_meter_bg',
+            container_type='Canvas',
+            width=270,
+            height=51
         )
-        boktai1_meter_bg = tkinter.Canvas(
-            boktai_meter_frame, width=270, height=51,
-            bg='#ECECEC', highlightbackground='#ECECEC', borderwidth=0, highlightthickness=0,
-            name="boktai1_meter_bg"
+        self._image_containers['bt1meter_fg'] = ImageHandler.from_file(
+            file_path=self._imgs["boktai1_meter_full.gif"],
+            version=1,
+            parent=boktai_meter_frame,
+            name='boktai1_meter_fg',
+            container_type='Canvas',
+            width=0,
+            height=51
         )
-        boktai2_meter_bg_img = tkinter.PhotoImage(
-            file=self._imgs["boktai2_meter_empty.gif"]
+        self._image_containers['bt2meter_bg'] = ImageHandler.from_file(
+            file_path=self._imgs["boktai2_meter_empty.gif"],
+            version=2,
+            parent=boktai_meter_frame,
+            name='boktai2_meter_bg',
+            container_type='Canvas',
+            width=280,
+            height=51
         )
-        boktai2_meter_bg = tkinter.Canvas(
-            boktai_meter_frame, width=280, height=51,
-            bg='#ECECEC', highlightbackground='#ECECEC', borderwidth=0, highlightthickness=0,
-            name="boktai2_meter_bg"
+        self._image_containers['bt2meter_fg'] = ImageHandler.from_file(
+            file_path=self._imgs["boktai2_meter_full.gif"],
+            version=2,
+            parent=boktai_meter_frame,
+            name='boktai2_meter_fg',
+            container_type='Canvas',
+            width=0,
+            height=51
         )
-        boktai3_meter_bg_img = tkinter.PhotoImage(
-            file=self._imgs["boktai3_meter_empty.gif"]
+        self._image_containers['bt3meter_bg'] = ImageHandler.from_file(
+            file_path=self._imgs["boktai3_meter_empty.gif"],
+            version=3,
+            parent=boktai_meter_frame,
+            name='boktai3_meter_bg',
+            container_type='Canvas',
+            width=280,
+            height=51
         )
-        boktai3_meter_bg = tkinter.Canvas(
-            boktai_meter_frame, width=280, height=51,
-            bg='#ECECEC', highlightbackground='#ECECEC', borderwidth=0, highlightthickness=0,
-            name="boktai3_meter_bg"
-        )
-        boktai1_meter_fg_img = tkinter.PhotoImage(
-            file=self._imgs["boktai1_meter_full.gif"]
-        )
-        boktai1_meter_fg = tkinter.Canvas(
-            boktai_meter_frame, width=0, height=51,
-            bg='#ECECEC', highlightbackground='#ECECEC', borderwidth=0, highlightthickness=0,
-            name="boktai1_meter_fg"
-        )
-        boktai2_meter_fg_img = tkinter.PhotoImage(
-            file=self._imgs["boktai2_meter_full.gif"]
-        )
-        boktai2_meter_fg = tkinter.Canvas(
-            boktai_meter_frame, width=0, height=51,
-            bg='#ECECEC', highlightbackground='#ECECEC', borderwidth=0, highlightthickness=0,
-            name="boktai2_meter_fg"
-        )
-        boktai3_meter_fg_img = tkinter.PhotoImage(
-            file=self._imgs["boktai3_meter_full.gif"]
-        )
-        boktai3_meter_fg = tkinter.Canvas(
-            boktai_meter_frame, width=0, height=51,
-            bg='#ECECEC', highlightbackground='#ECECEC', borderwidth=0, highlightthickness=0,
-            name="boktai3_meter_fg"
+        self._image_containers['bt3meter_fg'] = ImageHandler.from_file(
+            file_path=self._imgs["boktai3_meter_full.gif"],
+            version=3,
+            parent=boktai_meter_frame,
+            name='boktai3_meter_fg',
+            container_type='Canvas',
+            width=0,
+            height=51
         )
 
         ui_update_frame = tkinter.Frame(options_frame, name='ui_update_frame')
@@ -488,6 +514,7 @@ class WindowManager(object):
             text='Mute Flavor Sounds',
             command=self._wrap_option('mute_flavor_sounds'),
             variable=self._tk_variables['mute_flavor_sounds'],
+            style='custom.TCheckbutton',
             name='mute_flavor_sounds'
         )
         alert_sound_label = tkinter.Label(
@@ -515,6 +542,7 @@ class WindowManager(object):
             text='Mute Alert Sounds',
             command=self._wrap_option('mute_alert_sounds'),
             variable=self._tk_variables['mute_alert_sounds'],
+            style='custom.TCheckbutton',
             name='mute_alert_sounds'
         )
         mute_lunar_mode_separator = tkinter.ttk.Separator(options_frame)
@@ -526,6 +554,7 @@ class WindowManager(object):
             text='Enable Lunar Mode*',
             command=self._wrap_option('lunar_mode'),
             variable=self._tk_variables['lunar_mode'],
+            style='custom.TCheckbutton',
             name='lunar_mode'
         )
         lunar_mode_notes_label = tkinter.Label(
@@ -559,6 +588,7 @@ class WindowManager(object):
             command=self._update_temp_scale,
             variable=self._tk_variables['temp_scale'],
             value='F',
+            style='custom.TRadiobutton',
             name='fahrenheit_radio'
         )
         celsuis_radio = tkinter.ttk.Radiobutton(
@@ -567,6 +597,7 @@ class WindowManager(object):
             command=self._update_temp_scale,
             variable=self._tk_variables['temp_scale'],
             value='C',
+            style='custom.TRadiobutton',
             name='celsuis_radio'
         )
         theme_logging_separator = tkinter.ttk.Separator(options_frame)
@@ -678,38 +709,46 @@ class WindowManager(object):
         weather_state_option.grid(column=1, row=0, sticky=tkinter.NSEW)
 
         middle_spacing_label.grid(column=0, row=2)
-        boktai1_logo.grid(column=0, row=2, columnspan=8)
-        if self.config.version != 1:
-            boktai1_logo.grid_remove()
-        boktai_2_logo.grid(column=0, row=2, columnspan=8)
-        if self.config.version != 2:
-            boktai_2_logo.grid_remove()
-        boktai_3_logo.grid(column=0, row=2, columnspan=8)
-        if self.config.version != 3:
-            boktai_3_logo.grid_remove()
+        for version in (1, 2, 3):
+            self._image_containers[f'bt{version}_logo'].container.grid(
+                column=0, row=2, columnspan=8
+            )
+            if self.config.version != version:
+                self._image_containers[f'bt{version}_logo'].container.grid_remove()
         boktai_meter_frame.grid(column=0, row=3, columnspan=8)
-        boktai1_meter_bg.grid(column=0, row=4, columnspan=8)
-        boktai1_meter_bg.create_image(0, 0, anchor=tkinter.NW, image=boktai1_meter_bg_img)
-        boktai1_meter_fg.grid(column=0, row=4, columnspan=8)
-        boktai1_meter_fg.create_image(0, 0, anchor=tkinter.NW, image=boktai1_meter_fg_img)
-        boktai1_meter_fg.grid_remove()
+        self._image_containers['bt1meter_bg'].container.grid(
+            column=0, row=4, columnspan=8, sticky=tkinter.EW
+        )
+        self._image_containers['bt1meter_bg'].create_image(0, 0, anchor=tkinter.NW)
+        self._image_containers['bt1meter_fg'].container.grid(
+            column=0, row=4, columnspan=8, sticky=tkinter.EW
+        )
+        self._image_containers['bt1meter_fg'].create_image(0, 0, anchor=tkinter.NW)
+        self._image_containers['bt1meter_fg'].container.grid_remove()
         if self.config.version != 1:
-            boktai1_meter_bg.grid_remove()
-            boktai1_meter_fg.grid_remove()
-        boktai2_meter_bg.grid(column=0, row=4, columnspan=8)
-        boktai2_meter_bg.create_image(0, 0, anchor=tkinter.NW, image=boktai2_meter_bg_img)
-        boktai2_meter_fg.grid(column=0, row=4, columnspan=8)
-        boktai2_meter_fg.create_image(0, 0, anchor=tkinter.NW, image=boktai2_meter_fg_img)
+            self._image_containers['bt1meter_bg'].container.grid_remove()
+        self._image_containers['bt2meter_bg'].container.grid(
+            column=0, row=4, columnspan=8, sticky=tkinter.EW
+        )
+        self._image_containers['bt2meter_bg'].create_image(0, 0, anchor=tkinter.NW)
+        self._image_containers['bt2meter_fg'].container.grid(
+            column=0, row=4, columnspan=8, sticky=tkinter.EW
+        )
+        self._image_containers['bt2meter_fg'].create_image(0, 0, anchor=tkinter.NW)
+        self._image_containers['bt2meter_fg'].container.grid_remove()
         if self.config.version != 2:
-            boktai2_meter_bg.grid_remove()
-            boktai2_meter_fg.grid_remove()
-        boktai3_meter_bg.grid(column=0, row=4, columnspan=8)
-        boktai3_meter_bg.create_image(0, 0, anchor=tkinter.NW, image=boktai3_meter_bg_img)
-        boktai3_meter_fg.grid(column=0, row=4, columnspan=8)
-        boktai3_meter_fg.create_image(0, 0, anchor=tkinter.NW, image=boktai3_meter_fg_img)
+            self._image_containers['bt2meter_bg'].container.grid_remove()
+        self._image_containers['bt3meter_bg'].container.grid(
+            column=0, row=4, columnspan=8, sticky=tkinter.EW
+        )
+        self._image_containers['bt3meter_bg'].create_image(0, 0, anchor=tkinter.NW)
+        self._image_containers['bt3meter_fg'].container.grid(
+            column=0, row=4, columnspan=8, sticky=tkinter.EW
+        )
+        self._image_containers['bt3meter_fg'].create_image(0, 0, anchor=tkinter.NW)
+        self._image_containers['bt3meter_fg'].container.grid_remove()
         if self.config.version != 3:
-            boktai3_meter_bg.grid_remove()
-            boktai3_meter_fg.grid_remove()
+            self._image_containers['bt3meter_bg'].container.grid_remove()
         more_info_frame.grid(column=0, row=5, columnspan=8)
         location_label.grid(column=0, row=0, columnspan=5)
         min_temp_label.grid(column=0, row=1)
@@ -801,8 +840,8 @@ class WindowManager(object):
         self.window.destroy()
         time.sleep(3)
 
-    def do_update(self) -> None:
-        logging.debug('Performing update')
+    def do_update(self, event=None) -> None:
+        self.logger.debug('Performing update')
         if self._first_update:
             self._first_update = False
             self.timed_update()
@@ -904,7 +943,7 @@ class WindowManager(object):
             current_temp_val = round(f_to_c(self.config.avg_f), 2)
 
             manual_weather = WeatherInfo(
-                state='Nowhere',
+                state='World of Boktai',
                 city=city,
                 latlong=latlong,
                 woeid='0',
@@ -1035,13 +1074,8 @@ class WindowManager(object):
             self._widget_dict[f'boktai{self.config.version}_meter_fg'].grid(
                 column=0, row=4, columnspan=4, padx=45, sticky=tkinter.W
             )
-        bar_value = self.boktaisim.value
-        self._widget_dict[f'boktai{self.config.version}_meter_fg'].configure(
-            width=BOKTAI_METER[self.config.version][bar_value]
-        )
-        if self._last_value != bar_value:
-            self.play_sound('bar_update')
-        self._last_value = bar_value
+        self._update_bar(True)
+        self._update_logo()
         self.config.save()
 
     def alert(self, level: str, msg: str) -> None:
@@ -1077,7 +1111,7 @@ class WindowManager(object):
         otenko_img = tkinter.PhotoImage(file=self._imgs["Solar_Sensor_Icon.gif"])
         otenko_logo = tkinter.Label(
             about_window, image=otenko_img, bg='#ECECEC', highlightbackground='#ECECEC',
-            name='boktai1_logo'
+            name='otenko_logo'
         )
         version_label = tkinter.Label(
             about_window, text=f'Version {__version__}', fg="gray33", font=("TkDefaultFont", 10),
@@ -1158,7 +1192,153 @@ class WindowManager(object):
             self.config.save()
         return _option_setter
 
-    def _tab_switch(self, event=None):
+    def _update_bar(self, update_value: bool = False) -> None:
+        self._image_containers[f'bt{self.version}meter_bg'].container.configure(
+            width=self._canvas_width
+        )
+        win_height = self.window.winfo_height()
+        if self.version == 1:
+            size_height = round(270 * win_height / 100) // 5
+            size_width = round(51 * win_height / 100) // 5
+        else:
+            size_height = round(280 * win_height / 100) // 5
+            size_width = round(47 * win_height / 100) // 5
+        if size_height == 0:
+            return
+        self._image_containers[f'bt{self.version}meter_bg'].image = \
+            self._image_containers[f'bt{self.version}meter_bg'].image_copy.resize(
+                (size_height, size_width)
+            )
+        self._image_containers[f'bt{self.version}meter_bg'].tkimage = \
+            ImageTk.PhotoImage(self._image_containers[f'bt{self.version}meter_bg'].image)
+        self._image_containers[f'bt{self.version}meter_bg'].container.itemconfigure(
+            self._image_containers[f'bt{self.version}meter_bg'].created_image,
+            image=self._image_containers[f'bt{self.version}meter_bg'].tkimage
+        )
+        self._image_containers[f'bt{self.version}meter_bg'].container.configure(
+            width=size_height, height=size_width
+        )
+
+        if update_value:
+            try:
+                bar_value = self.boktaisim.value
+            except AttributeError:
+                return
+            if self._last_value != bar_value:
+                self.play_sound('bar_update')
+            self._last_value = bar_value
+        else:
+            if not self.boktaisim:
+                return
+            bar_value = self._last_value
+        canvas_width = round(BOKTAI_METER[self.version][bar_value] * win_height / 100) // 5
+        if self.version == 1:
+            size_width = round(51 * win_height / 100) // 5
+        else:
+            size_width = round(47 * win_height / 100) // 5
+        self.logger.debug(
+            f'Updating bar {self.version} with value {bar_value} (changed: {update_value}), '
+            f'size {size_width}x{size_height}'
+        )
+        self._image_containers[f'bt{self.version}meter_fg'].image = \
+            self._image_containers[f'bt{self.version}meter_fg'].image_copy.resize(
+                (size_height, size_width)
+            )
+        self._image_containers[f'bt{self.version}meter_fg'].tkimage = ImageTk.PhotoImage(
+            self._image_containers[f'bt{self.version}meter_fg'].image
+        )
+        self._image_containers[f'bt{self.version}meter_fg'].container.itemconfigure(
+            self._image_containers[f'bt{self.version}meter_fg'].created_image,
+            image=self._image_containers[f'bt{self.version}meter_fg'].tkimage
+        )
+        self._image_containers[f'bt{self.version}meter_fg'].container.configure(
+            width=canvas_width, height=size_width
+        )
+
+    def _update_logo(self) -> None:
+        win_height = self.window.winfo_height()
+        size_height = round(250 * win_height / 100) // 5
+        size_width = round(90 * win_height / 100) // 5
+        if size_height == 0:
+            return
+        self._image_containers[f'bt{self.version}_logo'].image = \
+            self._image_containers[f'bt{self.version}_logo'].image_copy.resize(
+                (size_height, size_width)
+            )
+        self._image_containers[f'bt{self.version}_logo'].tkimage = \
+            ImageTk.PhotoImage(self._image_containers[f'bt{self.version}_logo'].image)
+        self._image_containers[f'bt{self.version}_logo'].container.configure(
+            image=self._image_containers[f'bt{self.version}_logo'].tkimage
+        )
+
+    def _resize_window(self, event=None) -> None:
+        if isinstance(event.widget, tkinter.Tk):
+            if self._last_win_size == f'{event.width}x{event.height}':
+                return
+            self._last_win_size = f'{event.width}x{event.height}'
+            self._update_bar()
+            self._update_logo()
+            win_height = event.height
+            win_width = event.width
+            main_font_height = round(3 * win_height / 100)
+            caption_font_height = round(2 * win_height / 100)
+            self._main_font['size'] = main_font_height
+            self._caption_font['size'] = caption_font_height
+            for label, widget in self._widget_dict.items():
+                if (
+                        isinstance(widget, tkinter.Label) or
+                        isinstance(widget, tkinter.Scale) or
+                        isinstance(widget, tkinter.Radiobutton) or
+                        isinstance(widget, tkinter.Entry)
+                ) and widget.cget('font') in ['TkDefaultFont', 'TkTextFont', 'font1']:
+                    widget.configure(font=self._main_font)
+                if isinstance(widget, tkinter.Label) and \
+                        widget.cget('font') == 'TkSmallCaptionFont':
+                    widget.configure(font=self._caption_font)
+                if isinstance(widget, tkinter.Scale):
+                    length = round(40 * win_width / 100)
+                    widget.configure(length=length)
+                if isinstance(widget, tkinter.ttk.Button):
+                    style = tkinter.ttk.Style()
+                    style.configure(
+                        'custom.TButton',
+                        font=('TkDefaultFont', main_font_height)
+                    )
+                if isinstance(widget, tkinter.ttk.Radiobutton):
+                    style = tkinter.ttk.Style()
+                    style.configure(
+                        'custom.TRadiobutton',
+                        font=('TkDefaultFont', main_font_height)
+                    )
+                if isinstance(widget, tkinter.ttk.Checkbutton):
+                    style = tkinter.ttk.Style()
+                    style.configure(
+                        'custom.TCheckbutton',
+                        font=('TkDefaultFont', main_font_height)
+                    )
+                if isinstance(widget, tkinter.ttk.Combobox):
+                    style = tkinter.ttk.Style()
+                    style.configure(
+                        'custom.TCombobox',
+                        font=('TkDefaultFont', main_font_height)
+                    )
+                if isinstance(widget, tkinter.ttk.Notebook):
+                    style = tkinter.ttk.Style()
+                    style.configure(
+                        'custom.TNotebook.Tab',
+                        font=('TkDefaultFont', main_font_height)
+                    )
+                    style = tkinter.ttk.Style()
+                    style.configure(
+                        'centered.TNotebook.Tab',
+                        font=('TkDefaultFont', main_font_height)
+                    )
+                    style.configure(
+                        'centered.TNotebook',
+                        tabposition='n'
+                    )
+
+    def _tab_switch(self, event=None) -> None:
         area_notebook = self._widget_dict['area_notebook']
         self.config.area_type = area_notebook.tab(area_notebook.select(), 'text')
         self.config.save()
@@ -1309,6 +1489,68 @@ class WindowManager(object):
     @lunar_mode.setter
     def lunar_mode(self, value: bool) -> None:
         self.config.lunar_mode = value
+
+
+class ImageHandler(object):
+    def __init__(
+            self,
+            image: Image,
+            image_copy: Image,
+            tkimage: ImageTk.PhotoImage,
+            container: Union[tkinter.Label, tkinter.Canvas],
+            name: str,
+            version: int
+    ):
+        self.image = image
+        self.image_copy = image_copy
+        self.tkimage = tkimage
+        self.container = container
+        self.created_image = None
+        self.name = name
+        self.version = version
+
+    @classmethod
+    def from_file(
+            cls,
+            file_path: str,
+            version: int,
+            parent: tkinter.BaseWidget,
+            container_type: str,
+            name: str,
+            *args,
+            **kwargs
+    ):
+        image = Image.open(file_path)
+        image_copy = image.copy()
+        tkimage = ImageTk.PhotoImage(image)
+        if container_type == 'Canvas':
+            container = tkinter.Canvas(
+                parent, *args, bg='#ECECEC', highlightbackground='#ECECEC', borderwidth=0,
+                highlightthickness=0, name=name, **kwargs
+            )
+        elif container_type == 'Label':
+            container = tkinter.Label(
+                parent, *args, bg='#ECECEC', highlightbackground='#ECECEC', borderwidth=0,
+                highlightthickness=0, name=name, **kwargs
+            )
+        else:
+            raise ValueError('container_type must be either Canvas or Label')
+        return cls(
+            image=image,
+            image_copy=image_copy,
+            tkimage=tkimage,
+            container=container,
+            name=name,
+            version=version
+        )
+
+    @property
+    def container_type(self) -> str:
+        return self.container.__class__.__name__
+
+    def create_image(self, *args, **kwargs) -> int:
+        self.created_image = self.container.create_image(*args, image=self.tkimage, **kwargs)
+        return self.created_image
 
 
 class TextHandler(logging.Handler):
