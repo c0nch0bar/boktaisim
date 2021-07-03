@@ -4,7 +4,6 @@
 import datetime
 import importlib.resources as pkg_resources
 import logging
-import multiprocessing
 import os
 import pathlib
 from PIL import Image, ImageTk
@@ -14,7 +13,7 @@ import simpleaudio
 import sys
 import time
 import tkinter
-from tkinter import font, messagebox, scrolledtext
+from tkinter import font, messagebox
 import tkinter.ttk
 from typing import Dict, Optional, Union
 import webbrowser

@@ -97,7 +97,7 @@ setup(
         'requests',
         'pyzipcode',
         'appdirs',
-        'simpleaudio'
+        'simpleaudio', 'Pillow'
     ],
     entry_points={
         'console_scripts': ['boktaisim=boktaisim.boktaisim:main'],
