@@ -175,8 +175,17 @@ class WindowManager(object):
         simulator_frame = tkinter.Frame(master_notebook, name='simulator_frame')
         options_frame = tkinter.Frame(master_notebook, padx=10, pady=10, name='options_frame')
         logging_frame = tkinter.Frame(master_notebook, name='logging_frame')
-        logging_text = scrolledtext.ScrolledText(
-            logging_frame, state='disabled', font='TkFixedFont', name='logging_text'
+        logging_text = tkinter.Text(
+            logging_frame, state='disabled', font='TkFixedFont', wrap='none', name='logging_text'
+        )
+        logging_vertical_scroll = tkinter.ttk.Scrollbar(
+            logging_frame, command=logging_text.yview, orient="vertical"
+        )
+        logging_horizontal_scroll = tkinter.ttk.Scrollbar(
+            logging_frame, command=logging_text.xview, orient="horizontal"
+        )
+        logging_text.configure(
+            yscrollcommand=logging_vertical_scroll.set, xscrollcommand=logging_horizontal_scroll.set
         )
         logging_text.tag_config('INFO', foreground='black')
         logging_text.tag_config('DEBUG', foreground='blue')
@@ -797,6 +806,8 @@ class WindowManager(object):
         logging_frame.columnconfigure(0, weight=1)
         logging_frame.rowconfigure(0, weight=1)
         logging_text.grid(column=0, row=0, sticky=tkinter.NSEW)
+        logging_vertical_scroll.grid(column=1, row=0, sticky=tkinter.NS)
+        logging_horizontal_scroll.grid(column=0, row=1, sticky=tkinter.EW)
 
         about_button.grid(column=0, row=1)
         bottom_frame.grid(column=0, row=2, sticky=tkinter.E)
@@ -1249,10 +1260,6 @@ class WindowManager(object):
             size_width = round(51 * win_height / 100) // 5
         else:
             size_width = round(47 * win_height / 100) // 5
-        self.logger.debug(
-            f'Updating bar {self.version} with value {bar_value} (changed: {update_value}), '
-            f'size {size_width}x{size_height}'
-        )
         self._image_containers[f'bt{self.version}meter_fg'].image = \
             self._image_containers[f'bt{self.version}meter_fg'].image_copy.resize(
                 (size_height, size_width)
