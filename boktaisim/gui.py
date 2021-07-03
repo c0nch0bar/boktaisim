@@ -112,7 +112,7 @@ class WindowManager(object):
             # self.window.iconbitmap(self._imgs["boktaisim_icon.gif"])
             pass
         else:
-            self.window.iconbitmap(self._imgs["boktaisim_icon.gif.xbm"])
+            self.window.iconbitmap(self._imgs["boktaisim_icon.xbm"])
 
     def main(self, pipe: Optional[multiprocessing.Pipe] = None) -> None:
         self.window.geometry('405x480')
