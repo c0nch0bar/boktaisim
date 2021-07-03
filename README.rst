@@ -165,7 +165,6 @@ To-Do
 Pull requests are always welcome!
 
  - Graphs for all possible combinations for testing
- - Add horizontal scrollbar to logging window
 
  - Update bar on version selection
  - Better code documentation
