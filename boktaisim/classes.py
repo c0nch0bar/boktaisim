@@ -324,7 +324,7 @@ class WeatherInfo(object):
         )
 
     @property
-    def current_temp(self):
+    def current_temp(self) -> float:
         if self.manual:
             return round(random.triangular(self.min_temp, self.max_temp, mode=self.avg_temp), 2)
         return self._current_temp
@@ -373,7 +373,7 @@ class BoktaiSim(object):
             self.weather = manual_data
         self.parent = parent
 
-    def __str__(self):
+    def __str__(self) -> str:
         location_length = len(self.weather.city) + len(self.weather.state)
         temp_length = len(str(self.weather.min_temp_f)) + len(str(self.weather.max_temp_f)) + \
                       len(str(self.weather.current_temp_f))
@@ -418,7 +418,7 @@ class BoktaiSim(object):
         return self._version
 
     @version.setter
-    def version(self, value):
+    def version(self, value: int) -> None:
         assert isinstance(value, int)
         assert 0 < value < 4
         if self.parent:
@@ -433,9 +433,7 @@ class BoktaiSim(object):
         return self._lunar_mode
 
     @lunar_mode.setter
-    def lunar_mode(self, value):
-        assert isinstance(value, int)
-        assert 0 < value < 4
+    def lunar_mode(self, value: bool):
         if self.parent:
             self.parent.lunar_mode = value
         else:
@@ -575,7 +573,7 @@ class Temperature(object):
             self,
             value: Union[str, float, str],
             scale: Optional[str] = 'F'
-    ):
+    ) -> None:
         self.value = float(value)
         scale = scale.upper()
         if scale not in ('F', 'C'):
@@ -583,13 +581,13 @@ class Temperature(object):
         self.scale = scale
 
     @property
-    def celsius(self):
+    def celsius(self) -> float:
         if self.scale == 'F':
             return self.f_to_c(self.value)
         return self.value
 
     @property
-    def fahrenheit(self):
+    def fahrenheit(self) -> float:
         if self.scale == 'C':
             return self.c_to_f(self.value)
         return self.value

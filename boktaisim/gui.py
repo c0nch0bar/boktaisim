@@ -33,12 +33,12 @@ class WindowManager(object):
     def __init__(
             self,
             config_file: Optional[str] = None
-    ):
+    ) -> None:
         self.logger = logging.getLogger()
         self.window = tkinter.Tk()
         self.boktaisim: Optional[BoktaiSim] = None
         self.config = BoktaiConfig.from_json(config_file)
-        self.logger.setLevel(logging._nameToLevel[self.config.logging_level])
+        self.logger.setLevel(logging.getLevelName(self.config.logging_level))
         self._current_theme = None
         self._last_value = None
         self._last_version = None
@@ -122,7 +122,7 @@ class WindowManager(object):
         else:
             self.window.iconbitmap(self._imgs["boktaisim_icon.xbm"])
 
-    def main(self, pipe: Optional[multiprocessing.Pipe] = None) -> None:
+    def main(self) -> None:
         self._main_font = font.Font(self.window, family='TkDefaultFont')
         self._caption_font = font.Font(self.window, family='TkSmallCaptionFont')
         self.window.geometry('405x480')
@@ -402,7 +402,7 @@ class WindowManager(object):
             name='current_temp_label'
         )
         max_temp_label = tkinter.Label(
-            more_info_frame, text=f'Max °{self.config.temp_scale}: ??',name='max_temp_label'
+            more_info_frame, text=f'Max °{self.config.temp_scale}: ??', name='max_temp_label'
         )
         weather_state_icon = tkinter.PhotoImage(file=self._imgs[f"c.gif"])
         weather_state_label = tkinter.Label(
@@ -775,10 +775,14 @@ class WindowManager(object):
         mute_alert_checkbutton.grid(column=2, row=0, columnspan=2, padx=(5, 5))
         alert_sound_label.grid(column=0, row=1, columnspan=2, sticky=tkinter.E)
         alert_sound_option.grid(column=2, row=1, columnspan=2, sticky=tkinter.W)
-        mute_lunar_mode_separator.grid(column=0, row=5, columnspan=2, sticky=tkinter.EW, pady=(5, 5))
+        mute_lunar_mode_separator.grid(
+            column=0, row=5, columnspan=2, sticky=tkinter.EW, pady=(5, 5)
+        )
         lunar_mode_checkbutton.grid(column=0, row=6, columnspan=2)
         lunar_mode_notes_label.grid(column=0, row=7, columnspan=2)
-        lunar_mode_theme_separator.grid(column=0, row=8, columnspan=2, sticky=tkinter.EW, pady=(5, 5))
+        lunar_mode_theme_separator.grid(
+            column=0, row=8, columnspan=2, sticky=tkinter.EW, pady=(5, 5)
+        )
         theme_picker_frame.grid(column=0, row=9, columnspan=2, padx=(10, 10))
         theme_label.grid(column=0, row=0)
         theme_option.grid(column=1, row=0)
@@ -834,13 +838,17 @@ class WindowManager(object):
             widget_dict[name] = widget
         return widget_dict
 
-    def on_close(self, event=None) -> None:
+    def on_close(self, event: Optional[tkinter.Event] = None) -> None:
+        if event:
+            self.logger.debug(f'Received event {event}')
         self.logger.info('Quitting')
         self.play_sound('close')
         self.window.destroy()
         time.sleep(3)
 
-    def do_update(self, event=None) -> None:
+    def do_update(self, event: Optional[tkinter.Event] = None) -> None:
+        if event:
+            self.logger.debug(f'Received event {event}')
         self.logger.debug('Performing update')
         if self._first_update:
             self._first_update = False
@@ -858,6 +866,7 @@ class WindowManager(object):
         notebook = self._widget_dict['area_notebook']
         current_location_tab = notebook.tab(notebook.select(), "text")
         latlong = None
+        manual_weather = None
         if current_location_tab == 'Zipcode':
             try:
                 self.config.zipcode = int(
@@ -1081,7 +1090,7 @@ class WindowManager(object):
     def alert(self, level: str, msg: str) -> None:
         self.play_sound(level)
         messagebox.showwarning(level, msg)
-        self.logger.log(logging._nameToLevel[level.upper()], msg)
+        self.logger.log(logging.getLevelName(level.upper()), msg)
 
     def timed_update(self) -> None:
         self.logger.info('Performing timed update')
@@ -1167,12 +1176,16 @@ class WindowManager(object):
 
     @staticmethod
     def _wrap_launch(url: str):
-        def _launch_browser(event: Optional = None):
+        def _launch_browser(event: Optional[tkinter.Event] = None):
+            if event:
+                logging.debug(f'Received event {event}')
             webbrowser.open(url=url)
         return _launch_browser
 
     def _wrap_option(self, widget_label: str, option_label: Optional[str] = None):
-        def _option_setter(event: Optional = None):
+        def _option_setter(event: Optional[tkinter.Event] = None):
+            if event:
+                logging.debug(f'Received event {event}')
             if option_label:
                 value = self._tk_variables[option_label].get()
             else:
@@ -1338,12 +1351,16 @@ class WindowManager(object):
                         tabposition='n'
                     )
 
-    def _tab_switch(self, event=None) -> None:
+    def _tab_switch(self, event: Optional[tkinter.Event] = None) -> None:
+        if event:
+            self.logger.debug(f'Received event {event}')
         area_notebook = self._widget_dict['area_notebook']
         self.config.area_type = area_notebook.tab(area_notebook.select(), 'text')
         self.config.save()
 
-    def _update_temp_scale(self, event=None) -> None:
+    def _update_temp_scale(self, event: Optional[tkinter.Event] = None) -> None:
+        if event:
+            self.logger.debug(f'Received event {event}')
         if self.config.temp_scale != self._tk_variables['temp_scale'].get():
             if not self.boktaisim:
                 return
@@ -1425,22 +1442,28 @@ class WindowManager(object):
                         0, max_f
                     )
 
-    def _update_theme(self, event=None) -> None:
+    def _update_theme(self, event: Optional[tkinter.Event] = None) -> None:
+        if event:
+            self.logger.debug(f'Received event {event}')
         tkinter.ttk.Style().theme_use(self._tk_variables['theme'].get())
         self.config.theme = self._tk_variables['theme'].get()
         self.logger.debug(f'Updating theme to `{self.config.theme}`')
         self.config.save()
 
-    def _update_logging_level(self, event=None) -> None:
+    def _update_logging_level(self, event: Optional[tkinter.Event] = None) -> None:
+        if event:
+            self.logger.debug(f'Received event {event}')
         logging_level = self._tk_variables['logging_level'].get()
         if logging_level != self.config.logging_level:
             self.logger.debug(f'Setting log level to `{logging_level}`')
-            self.logger.setLevel(logging._nameToLevel[logging_level])
+            self.logger.setLevel(logging.getLevelName(logging_level))
         self.logger.info(f'Updating theme to `{self.config.theme}`')
         self.config.logging_level = logging_level
         self.config.save()
 
-    def _set_alert_sound(self, event=None) -> None:
+    def _set_alert_sound(self, event: Optional[tkinter.Event] = None) -> None:
+        if event:
+            self.logger.debug(f'Received event {event}')
         selection = self._tk_variables["alert_sound_option"].get()
         if sys.platform == 'win32' and hasattr(sys, 'frozen'):
             audio_segment = simpleaudio.WaveObject.from_wave_file(f'resources/{selection}.wav')
@@ -1500,7 +1523,7 @@ class ImageHandler(object):
             container: Union[tkinter.Label, tkinter.Canvas],
             name: str,
             version: int
-    ):
+    ) -> None:
         self.image = image
         self.image_copy = image_copy
         self.tkimage = tkimage
@@ -1556,13 +1579,13 @@ class ImageHandler(object):
 class TextHandler(logging.Handler):
     """This class allows you to log to a Tkinter Text or ScrolledText widget"""
 
-    def __init__(self, text):
+    def __init__(self, text) -> None:
         # run the regular Handler __init__
         logging.Handler.__init__(self)
         # Store a reference to the Text it will log to
         self.text = text
 
-    def emit(self, record):
+    def emit(self, record) -> None:
         msg = self.format(record)
 
         def append():
