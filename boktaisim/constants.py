@@ -9,61 +9,71 @@ WEATHER_STATES = {
         'name': 'Snow',
         'min': 0,
         'avg': 2,
-        'max': 5
+        'max': 5,
+        'mod': 0
     },
     'sl': {
         'name': 'Sleet',
         'min': 0,
         'avg': 1,
-        'max': 3
+        'max': 3,
+        'mod': -2
     },
     'h': {
         'name': 'Hail',
         'min': 0,
         'avg': 1,
-        'max': 3
+        'max': 3,
+        'mod': -2
     },
     't': {
         'name': 'Thunderstorm',
         'min': 0,
         'avg': 1,
-        'max': 2
+        'max': 2,
+        'mod': -2
     },
     'hr': {
         'name': 'Heavy Rain',
         'min': 0,
         'avg': 2,
-        'max': 4
+        'max': 4,
+        'mod': -1
     },
     'lr': {
         'name': 'Light Rain',
         'min': 0,
         'avg': 3,
-        'max': 8
+        'max': 8,
+        'mod': 0
     },
     's': {
         'name': 'Showers',
         'min': 1,
         'avg': 5,
-        'max': 9
+        'max': 9,
+        'mod': 1
     },
     'hc': {
         'name': 'Heavy Cloud',
         'min': 0,
         'avg': 2,
-        'max': 4
+        'max': 4,
+        'mod': -1
     },
     'lc': {
         'name': 'Light Cloud',
         'min': 2,
         'avg': 5,
-        'max': 10
+        'max': 10,
+        'mod': 1
     },
     'c': {
         'name': 'Clear',
         'min': 4,
         'avg': 7,
-        'max': 10
+        'max': 10,
+        'mod': 1
     },
 }
 

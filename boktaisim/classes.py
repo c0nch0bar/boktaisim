@@ -547,7 +547,13 @@ class BoktaiSim(object):
             return round(self._version_return(value_sum / value_count / 2))
         if self.weather.sun_position == 100.0 or self.weather.sun_position == -1:
             return 0
-        return round(self._version_return(value_sum / value_count))
+        initial_result = value_sum / value_count
+        initial_result = initial_result + WEATHER_STATES[self.weather.weather_state]['mod']
+        if initial_result > 10:
+            initial_result = 10
+        if initial_result < 0:
+            initial_result = 0
+        return round(self._version_return(initial_result))
 
     def _version_return(
             self,
