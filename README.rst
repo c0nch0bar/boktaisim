@@ -164,8 +164,6 @@ To-Do
 
 Pull requests are always welcome!
 
- - Graphs for all possible combinations for testing
-
  - Update bar on version selection
  - Better code documentation
  - Make Fahrenheit/Celsius handling more sane
