@@ -7,7 +7,6 @@ import logging
 import os
 import pathlib
 from PIL import Image, ImageTk
-import platform
 import requests
 import simpleaudio
 import sys
@@ -21,10 +20,12 @@ import webbrowser
 from .classes import BoktaiConfig, BoktaiSim, c_to_f, f_to_c, WeatherInfo, zip_to_latlong
 from .constants import BOKTAI_METER, IMAGES, LOCAL_TIMEZONE, SOUNDS, WEATHER_STATES,\
     WEATHER_STATES_REVERSE
+from .utils import get_state
 from .version import __version__
 
+BOKTAI_STATE = get_state()
 
-if sys.platform == 'win32' and hasattr(sys, 'frozen'):
+if BOKTAI_STATE[0:2] == ('windows', 'frozen'):
     os.chdir(str(pathlib.Path(sys.executable).parent))
 
 
@@ -60,16 +61,16 @@ class WindowManager(object):
         self._set_icon()
 
     def _select_link_cursor(self) -> None:
-        if sys.platform == 'darwin':
+        if BOKTAI_STATE[0] == 'mac':
             self._link_cursor = 'pointinghand'
-        elif sys.platform == 'win32':
+        elif BOKTAI_STATE[0] == 'windows':
             self._link_cursor = 'hand2'
         else:
             self._link_cursor = 'hand1'
 
     def _init_sound_dict(self) -> None:
         self._sound_dict = SOUNDS.copy()
-        if sys.platform == 'win32' and hasattr(sys, 'frozen'):
+        if BOKTAI_STATE[0:2] == ('windows', 'frozen'):
             for sound_name, sound_data in SOUNDS.items():
                 if not sound_data:
                     self._sound_dict[sound_name] = None
@@ -100,9 +101,9 @@ class WindowManager(object):
 
     def _init_image_paths(self) -> None:
         for image_name in IMAGES:
-            if sys.platform == 'darwin' and hasattr(sys, 'frozen') and sys.frozen == 'macosx_app':
+            if BOKTAI_STATE == ('mac', 'frozen', 'app'):
                 self._imgs[image_name] = image_name
-            elif sys.platform == 'win32' and hasattr(sys, 'frozen'):
+            elif BOKTAI_STATE[0:2] == ('windows', 'frozen'):
                 self._imgs[image_name] = f'resources/{image_name}'
             else:
                 with pkg_resources.path('boktaisim.resources', image_name) as image_path:
@@ -110,11 +111,10 @@ class WindowManager(object):
             continue
 
     def _set_icon(self) -> None:
-        system = platform.system()
-        if system == 'Windows':
+        if BOKTAI_STATE[0] == 'windows':
             self.window.iconbitmap(self._imgs["boktaisim_icon.ico"])
             pass
-        elif system == 'Darwin':
+        elif BOKTAI_STATE[0] == 'mac':
             # Looks like there's no actual way to set an icon on Mac with tkinter :'(
             # self.window.iconbitmap(self._imgs["boktaisim_icon.gif"])
             pass
@@ -1296,13 +1296,17 @@ class WindowManager(object):
         if self._last_win_size == f'{event.width}x{event.height}' and not \
                 hasattr(event, '_theme_switch'):
             return
+        if BOKTAI_STATE[0] == 'windows':
+            starting_sizes = (2.5, 1.5)
+        else:
+            starting_sizes = (3, 2)
         self._last_win_size = f'{event.width}x{event.height}'
         self._update_bar()
         self._update_logo()
         win_height = event.height
         win_width = event.width
-        main_font_height = round(3 * win_height / 100)
-        caption_font_height = round(2 * win_height / 100)
+        main_font_height = round(starting_sizes[0] * win_height / 100)
+        caption_font_height = round(starting_sizes[1] * win_height / 100)
         self._main_font['size'] = main_font_height
         self._caption_font['size'] = caption_font_height
         for label, widget in self._widget_dict.items():
@@ -1480,7 +1484,7 @@ class WindowManager(object):
         if event:
             self.logger.debug(f'Received event {event}')
         selection = self._tk_variables["alert_sound_option"].get()
-        if sys.platform == 'win32' and hasattr(sys, 'frozen'):
+        if BOKTAI_STATE[0:2] == ('windows', 'frozen'):
             audio_segment = simpleaudio.WaveObject.from_wave_file(f'resources/{selection}.wav')
             self._sound_dict['bar_update']['segment'] = audio_segment
             self._sound_dict['bar_update']['file'] = f'resources/{selection}.wav'

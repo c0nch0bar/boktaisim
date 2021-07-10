@@ -43,7 +43,7 @@ The first and most important thing to note about the program is that it does not
 
 What the app does do is generate an artificial sunlight reading that you can manually input into the game as you play. The program will give a chime at set intervals if there is a change to how much sunlight your in-game meter should have. This allows you to keep it open in the background while you play and not have to worry about checking it manually every couple of minutes. To generate the readings we used a formula combining temperature relative to the low and high forecast for the day, weather status (Clear Skies, Partial Clouds, Rain etc), position of the sun from sunrise to sunset, and a bit of RNG to determine how much 'sunlight' the meter is getting at any one time. We thought that these particular parameters would make the game playable by everyone around the world, as opposed to just naturally 'hot' environments with clear skies all the time (though, those areas will tend to have higher average readings of course).
 
-Some of you may be asking why I'd go through all this trouble when the `Myboy GBA emulator`_ actually has a setting that uses the phones camera to fill Boktai's sun meter based on how much light it sees. I debated playing this way, but I just can't get in the groove of playing an action adventure game with touch controls. It also doesn't fit with the theming of Boktai very well, in my opinion. The camera will use any light, not just UV rays, so it's not really based around nature anymore. This may be nitpicky, but it felt less authentic to me. That said if you are fine with playing on your smart phone, Myboy is a great alternative to this project, and arguably a simpler solution.
+Some of you may be asking why I'd go through all this trouble when the `Myboy GBA emulator`_ actually has a setting that uses the phones light sensor to fill Boktai's sun meter based on how much light it sees. I debated playing this way, but I just can't get in the groove of playing an action adventure game with touch controls. It also doesn't fit with the theming of Boktai very well, in my opinion. The camera will use any light, not just UV rays, so it's not really based around nature anymore. This may be nitpicky, but it felt less authentic to me. That said if you are fine with playing on your smart phone, Myboy is a great alternative to this project, and arguably a simpler solution.
 
 The only other thing you may be scratching your head about after looking at the program is... 'Lunar Mode'. Boktai, by default, is not meant to be played for long periods at night; In fact, some parts of the game are impossible to progress without sunlight. By default the program reflects this, but after further thinking we decided to implement an optional 'Lunar Mode' to make the game playable at all hours. We tried to keep the spirit of the game and program in tact by making the lunar readings cap out at a much lower level than they would during the day, while still making the game fully playable, if a bit more challenging.
 
@@ -164,6 +164,7 @@ To-Do
 
 Pull requests are always welcome!
 
+ - Lower weight of temperature metric
  - Update bar on version selection
  - Better code documentation
  - Make Fahrenheit/Celsius handling more sane

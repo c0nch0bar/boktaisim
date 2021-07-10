@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-
 import appdirs
 import datetime
 import json
@@ -10,15 +9,16 @@ import logging
 import pathlib
 import random
 import requests
-import sys
 from typing import Optional, TYPE_CHECKING, Union
 
 from .constants import FEATURE_WEIGHTS, WEATHER_STATES
+from .utils import get_state
 
 import pyzipcode
-if sys.platform == 'darwin' and hasattr(sys, 'frozen') and sys.frozen == 'macosx_app':
+BOKTAI_STATE = get_state()
+if BOKTAI_STATE == ('mac', 'frozen', 'app'):
     pyzipcode.db_location = 'zipcodes.db'
-elif sys.platform == 'win32' and hasattr(sys, 'frozen'):
+elif BOKTAI_STATE[0:2] == ('windows', 'frozen'):
     pyzipcode.db_location = 'resources/zipcodes.db'
 else:
     pass
@@ -553,7 +553,9 @@ class BoktaiSim(object):
             initial_result = 10
         if initial_result < 0:
             initial_result = 0
-        return round(self._version_return(initial_result))
+        final_result = round(self._version_return(initial_result))
+        logging.debug(f'Final Bar Value: {final_result}')
+        return final_result
 
     def _version_return(
             self,

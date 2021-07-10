@@ -73,7 +73,7 @@ def comprehensive_test():
                     continue
                 results = general_test(
                     weather_state=state, min_temp=min_temp, max_temp=max_temp, avg_temp=avg_temp,
-                    current_temp=current_temp, sun_value=sun_value, count=1000
+                    current_temp=current_temp, sun_value=sun_value, count=1000, version=1
                 )
                 axs[j, i].clear()
                 axs[j, i].set_xticks(results[1])
