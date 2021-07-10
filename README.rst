@@ -142,7 +142,7 @@ For Mac
 
 ::
 
-  python setup.py py2app -i boktaisim.resources -r boktaisim/resources/
+  python setup.py py2app
 
 |
 |

@@ -20,10 +20,10 @@ except ImportError:
 
 exec(open('boktaisim/version.py').read())
 
-data_file_paths = glob('resources/*.wav')
-data_file_paths.extend(glob('resources/*.gif'))
-data_file_paths.extend(glob('resources/*.db'))
-data_file_paths.extend(glob('resources/*.ico'))
+data_file_paths = glob('boktaisim/resources/*.wav')
+data_file_paths.extend(glob('boktaisim/resources/*.gif'))
+data_file_paths.extend(glob('boktaisim/resources/*.db'))
+data_file_paths.extend(glob('boktaisim/resources/*.ico'))
 DATA_FILES = [
     ('resources', data_file_paths),
 ]
@@ -37,7 +37,10 @@ if sys.platform == 'darwin':
          options=dict(
              py2app=dict(
                  argv_emulation=False,
-                 iconfile='boktaisim/resources/Solar_Sensor_Icon.icns'
+                 iconfile='boktaisim/resources/Solar_Sensor_Icon.icns',
+                 resources=['boktaisim/resources/'],
+                 includes=['boktaisim.resources'],
+                 excludes=['numpy', 'matplotlib']
              )
          ),
     )
@@ -56,8 +59,7 @@ elif sys.platform == 'win32':
                 "packages": ["boktaisim.resources"],
                 "bundle_files": 1
             }
-        },
-        zipfile=None
+        }
     )
 else:
     extra_options = dict(
@@ -91,13 +93,14 @@ setup(
     project_urls={
         'Source': 'https://bitbucket.org/c0nch0b4r/boktaisim/src'
     },
-    python_requires='>=3.6, <4',
+    python_requires='>=3.8, <4',
     install_requires=[
         'typing',
         'requests',
         'pyzipcode',
         'appdirs',
-        'simpleaudio', 'Pillow'
+        'simpleaudio',
+        'Pillow'
     ],
     entry_points={
         'console_scripts': ['boktaisim=boktaisim.boktaisim:main'],
