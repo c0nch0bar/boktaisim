@@ -8,6 +8,7 @@ from .constants import WEATHER_STATES
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
+from matplotlib.ticker import AutoMinorLocator
 
 
 def comprehensive_test():
@@ -76,24 +77,27 @@ def comprehensive_test():
                 )
                 axs[j, i].clear()
                 axs[j, i].set_xticks(results[1])
+                axs[j, i].xaxis.set_minor_locator(AutoMinorLocator(n=2))
+                axs[j, i].tick_params(which='minor', direction='in', length=7, top=False)
+                axs[j, i].tick_params(which='major', width=2, top=False, right=False)
                 axs[j, i].bar(
-                    results[1], results[0]['temperature'], align='center', width=1/4, alpha=.75,
+                    results[1]-3/8, results[0]['temperature'], align='center', width=1/4, alpha=.75,
                     color=colors['temperature']
                 )
                 axs[j, i].bar(
-                    results[1]+1/4, results[0]['weather'], align='center', width=1/4, alpha=.75,
+                    results[1]-1/8, results[0]['weather'], align='center', width=1/4, alpha=.75,
                     color=colors['weather']
                 )
                 axs[j, i].bar(
-                    results[1]+1/2, results[0]['sun_location'], width=1/4, align='center',
+                    results[1]+1/8, results[0]['sun_location'], width=1/4, align='center',
                     alpha=.75, color=colors['sun_location']
                 )
                 axs[j, i].bar(
-                    results[1]+3/4, results[0]['random'], align='center', width=1/4, alpha=.75,
+                    results[1]+3/8, results[0]['random'], align='center', width=1/4, alpha=.75,
                     color=colors['random']
                 )
                 axs[j, i].bar(
-                    results[1]+3/8, results[0]['total'], align='center', width=1, alpha=.45,
+                    results[1], results[0]['total'], align='center', width=1, alpha=.45,
                     ls='dashed', color=colors['total'], edgecolor='black'
                 )
                 axs[j, i].set_title(WEATHER_STATES[state]['name'])
@@ -124,11 +128,12 @@ def general_test(
         current_temp: float = 12,
         weather_state: str = 'c',
         sun_value: float = 50,
+        version: int = 2,
         count: int = 100,
         **kwargs
 ):
     sim = BoktaiSim(
-        version=2,
+        version=version,
         manual_data=WeatherInfo(
             state='N/A',
             city='N/A',
