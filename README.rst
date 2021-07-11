@@ -164,7 +164,6 @@ To-Do
 
 Pull requests are always welcome!
 
- - Lower weight of temperature metric
  - Update bar on version selection
  - Better code documentation
  - Make Fahrenheit/Celsius handling more sane
