@@ -110,10 +110,10 @@ SUN_STATES = {
 }
 
 FEATURE_WEIGHTS = {
-    'temperature': 1,
-    'weather': 1,
-    'sun_location': 1,
-    'random': 1
+    'temperature': 20,
+    'weather': 25,
+    'sun_location': 30,
+    'random': 25
 }
 
 BOKTAI_METER = {

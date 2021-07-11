@@ -173,9 +173,9 @@ def general_test(
             'sun_location': sim._calulate_sun_value(sun_value, **kwargs),
             'random': sim.random_weather_value
         }
-        total = values['temperature'] + values['weather'] + values['random'] + values[
-            'sun_location']
-        result = total / 4
+        total = (values['temperature'] * 20) + (values['weather'] * 25) + (values['random'] * 25) + (values[
+            'sun_location'] * 30)
+        result = total / 100
         if weather_state in ('h', 't'):
             result -= 2
             if result < 0:
