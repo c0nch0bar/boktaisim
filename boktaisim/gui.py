@@ -1297,7 +1297,7 @@ class WindowManager(object):
                 hasattr(event, '_theme_switch'):
             return
         if BOKTAI_STATE[0] == 'windows':
-            starting_sizes = (2.5, 1.5)
+            starting_sizes = (2.25, 1.75)
         else:
             starting_sizes = (3, 2)
         self._last_win_size = f'{event.width}x{event.height}'

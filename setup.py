@@ -22,6 +22,7 @@ exec(open('boktaisim/version.py').read())
 
 data_file_paths = glob('boktaisim/resources/*.wav')
 data_file_paths.extend(glob('boktaisim/resources/*.gif'))
+data_file_paths.extend(glob('boktaisim/resources/*.jpg'))
 data_file_paths.extend(glob('boktaisim/resources/*.db'))
 data_file_paths.extend(glob('boktaisim/resources/*.ico'))
 DATA_FILES = [
