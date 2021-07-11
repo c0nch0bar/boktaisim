@@ -424,7 +424,7 @@ class WindowManager(object):
         )
         boktai_meter_frame = tkinter.Frame(simulator_frame, width=274, name='boktai_meter_frame')
         self._image_containers['bt1meter_bg'] = ImageHandler.from_file(
-            file_path=self._imgs["boktai1_meter_empty.gif"],
+            file_path=self._imgs["boktai1_meter_empty.jpg"],
             version=1,
             parent=boktai_meter_frame,
             name='boktai1_meter_bg',
@@ -433,7 +433,7 @@ class WindowManager(object):
             height=51
         )
         self._image_containers['bt1meter_fg'] = ImageHandler.from_file(
-            file_path=self._imgs["boktai1_meter_full.gif"],
+            file_path=self._imgs["boktai1_meter_full.jpg"],
             version=1,
             parent=boktai_meter_frame,
             name='boktai1_meter_fg',
@@ -442,7 +442,7 @@ class WindowManager(object):
             height=51
         )
         self._image_containers['bt2meter_bg'] = ImageHandler.from_file(
-            file_path=self._imgs["boktai2_meter_empty.gif"],
+            file_path=self._imgs["boktai2_meter_empty.jpg"],
             version=2,
             parent=boktai_meter_frame,
             name='boktai2_meter_bg',
@@ -451,7 +451,7 @@ class WindowManager(object):
             height=51
         )
         self._image_containers['bt2meter_fg'] = ImageHandler.from_file(
-            file_path=self._imgs["boktai2_meter_full.gif"],
+            file_path=self._imgs["boktai2_meter_full.jpg"],
             version=2,
             parent=boktai_meter_frame,
             name='boktai2_meter_fg',
@@ -460,7 +460,7 @@ class WindowManager(object):
             height=51
         )
         self._image_containers['bt3meter_bg'] = ImageHandler.from_file(
-            file_path=self._imgs["boktai3_meter_empty.gif"],
+            file_path=self._imgs["boktai3_meter_empty.jpg"],
             version=3,
             parent=boktai_meter_frame,
             name='boktai3_meter_bg',
@@ -469,7 +469,7 @@ class WindowManager(object):
             height=51
         )
         self._image_containers['bt3meter_fg'] = ImageHandler.from_file(
-            file_path=self._imgs["boktai3_meter_full.gif"],
+            file_path=self._imgs["boktai3_meter_full.jpg"],
             version=3,
             parent=boktai_meter_frame,
             name='boktai3_meter_fg',
