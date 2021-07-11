@@ -15,6 +15,7 @@ from .constants import FEATURE_WEIGHTS, WEATHER_STATES
 from .utils import get_state
 
 import pyzipcode
+
 BOKTAI_STATE = get_state()
 if BOKTAI_STATE == ('mac', 'frozen', 'app'):
     pyzipcode.db_location = 'zipcodes.db'
@@ -56,6 +57,7 @@ class BoktaiConfig(object):
     alert_sound_option:     Which wav file to use for alert sounds
     config_file:            Path to the config file
     """
+
     def __init__(
             self,
             gui_update_interval: int = 300,
@@ -376,7 +378,7 @@ class BoktaiSim(object):
     def __str__(self) -> str:
         location_length = len(self.weather.city) + len(self.weather.state)
         temp_length = len(str(self.weather.min_temp_f)) + len(str(self.weather.max_temp_f)) + \
-                      len(str(self.weather.current_temp_f))
+            len(str(self.weather.current_temp_f))
         return_str = '╭── Stiles\' Solar Simulator for the Boktai Trilogy ──╮\n'
         return_str += '│' + (' ' * 52) + '│\n'
         return_str += f'│   Location: {self.weather.city}, {self.weather.state}' + \
@@ -391,10 +393,10 @@ class BoktaiSim(object):
                 return_str += '│' + (' ' * 18) + '║▓│▓│▓│▓│▓│▓│▓│▓║' + (' ' * 17) + '│\n'
             elif 1 <= self.temperature_value <= 6:
                 return_str += '│' + (' ' * 18) + '║' + ('▓│' * self.temperature_value) + (
-                            ' │' * (8 - self.temperature_value - 1)) + ' ║' + (' ' * 17) + '│\n'
+                        ' │' * (8 - self.temperature_value - 1)) + ' ║' + (' ' * 17) + '│\n'
             else:
                 return_str += '│' + (' ' * 18) + '║' + ('▓│' * self.temperature_value) + (
-                            ' │' * (8 - self.temperature_value)) + '║' + (' ' * 17) + '│\n'
+                        ' │' * (8 - self.temperature_value)) + '║' + (' ' * 17) + '│\n'
             return_str += '│' + (' ' * 18) + '╚' + ('═╧' * 7) + '═╝' + (' ' * 17) + '│\n'
         elif self.version == 2 or self.version == 3:
             return_str += '│' + (' ' * 16) + '╔' + ('═╤' * 9) + '═╗' + (' ' * 15) + '│\n'
@@ -402,10 +404,10 @@ class BoktaiSim(object):
                 return_str += '│' + (' ' * 16) + '║▓│▓│▓│▓│▓│▓│▓│▓│▓│▓║' + (' ' * 15) + '│\n'
             elif 1 <= self.temperature_value <= 9:
                 return_str += '│' + (' ' * 16) + '║' + ('▓│' * self.temperature_value) + (
-                            ' │' * (10 - self.temperature_value - 1)) + ' ║' + (' ' * 15) + '│\n'
+                        ' │' * (10 - self.temperature_value - 1)) + ' ║' + (' ' * 15) + '│\n'
             else:
                 return_str += '│' + (' ' * 16) + '║' + ('▓│' * self.temperature_value) + (
-                            ' │' * (10 - self.temperature_value)) + '║' + (' ' * 15) + '│\n'
+                        ' │' * (10 - self.temperature_value)) + '║' + (' ' * 15) + '│\n'
             return_str += '│' + (' ' * 16) + '╚' + ('═╧' * 9) + '═╝' + (' ' * 15) + '│\n'
         return_str += '│' + (' ' * 52) + '│\n'
         return_str += '╰' + ('─' * 52) + '╯'
@@ -657,4 +659,3 @@ def check_latlong(lat: float, lon: float) -> bool:
     if not -180 <= lon <= 180:
         return False
     return True
-

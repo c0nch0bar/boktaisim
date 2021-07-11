@@ -21,19 +21,19 @@ def comprehensive_test():
 
     ax_max_temp = plt.axes([0.2, 0.047, 0.65, 0.01], facecolor='lightgoldenrodyellow')
     slider_max_temp = Slider(ax_max_temp, 'Max Temperature', 0., 100.,
-                        valinit=90., valstep=None)
+                             valinit=90., valstep=None)
 
     ax_avg_temp = plt.axes([0.2, 0.034, 0.65, 0.01], facecolor='lightgoldenrodyellow')
     slider_avg_temp = Slider(ax_avg_temp, 'Avg Temperature', 0., 100.,
-                        valinit=50., valstep=None)
+                             valinit=50., valstep=None)
 
     ax_min_temp = plt.axes([0.2, 0.021, 0.65, 0.01], facecolor='lightgoldenrodyellow')
     slider_min_temp = Slider(ax_min_temp, 'Min Temperature', 0., 100.,
-                        valinit=0., valstep=None)
+                             valinit=0., valstep=None)
 
     ax_temp = plt.axes([0.2, 0.008, 0.65, 0.01], facecolor='lightgoldenrodyellow')
     slider_temp = Slider(ax_temp, 'Current Temperature', 0., 100.,
-                        valinit=50., valstep=None)
+                         valinit=50., valstep=None)
 
     colors = {
         'temperature': 'red',
@@ -81,19 +81,22 @@ def comprehensive_test():
                 axs[j, i].tick_params(which='minor', direction='in', length=7, top=False)
                 axs[j, i].tick_params(which='major', width=2, top=False, right=False)
                 axs[j, i].bar(
-                    results[1]-3/8, results[0]['temperature'], align='center', width=1/4, alpha=.75,
+                    results[1] - 3 / 8, results[0]['temperature'], align='center', width=1 / 4,
+                    alpha=.75,
                     color=colors['temperature']
                 )
                 axs[j, i].bar(
-                    results[1]-1/8, results[0]['weather'], align='center', width=1/4, alpha=.75,
+                    results[1] - 1 / 8, results[0]['weather'], align='center', width=1 / 4,
+                    alpha=.75,
                     color=colors['weather']
                 )
                 axs[j, i].bar(
-                    results[1]+1/8, results[0]['sun_location'], width=1/4, align='center',
+                    results[1] + 1 / 8, results[0]['sun_location'], width=1 / 4, align='center',
                     alpha=.75, color=colors['sun_location']
                 )
                 axs[j, i].bar(
-                    results[1]+3/8, results[0]['random'], align='center', width=1/4, alpha=.75,
+                    results[1] + 3 / 8, results[0]['random'], align='center', width=1 / 4,
+                    alpha=.75,
                     color=colors['random']
                 )
                 axs[j, i].bar(
@@ -106,6 +109,7 @@ def comprehensive_test():
                     j += 1
                     i = 0
             fig.canvas.draw_idle()
+
         return update
 
     slider_temp.on_changed(_wrap_update('current_temp'))
@@ -117,7 +121,6 @@ def comprehensive_test():
 
     handles = [plt.Rectangle((50, 50), 5, 5, color=colors[label]) for label in labels]
     plt.legend(handles, labels, loc=(0, 8), mode='expand', ncol=5)
-    #plt.tight_layout()
     plt.show()
 
 
@@ -170,7 +173,8 @@ def general_test(
             'sun_location': sim._calulate_sun_value(sun_value, **kwargs),
             'random': sim.random_weather_value
         }
-        total = values['temperature'] + values['weather'] + values['random'] + values['sun_location']
+        total = values['temperature'] + values['weather'] + values['random'] + values[
+            'sun_location']
         result = total / 4
         if weather_state in ('h', 't'):
             result -= 2

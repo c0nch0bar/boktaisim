@@ -493,7 +493,7 @@ class WindowManager(object):
         ui_update_timer_label = tkinter.Label(
             ui_update_frame, text='0 = Disable \nAutomatic UI Updates', name='ui_update_timer_label'
         )
-        ui_api_update_seperator = tkinter.ttk.Separator(options_frame)
+        ui_adi_update_separator = tkinter.ttk.Separator(options_frame)
         api_update_frame = tkinter.Frame(options_frame, name='api_update_frame')
         api_update_timer_header = tkinter.Label(
             api_update_frame, text='API Update Interval (Minutes)', name='api_update_timer_header'
@@ -770,7 +770,7 @@ class WindowManager(object):
         ui_update_timer_header.grid(column=0, row=0, columnspan=2)
         ui_update_timer_slider.grid(column=0, row=1)
         ui_update_timer_label.grid(column=1, row=1)
-        ui_api_update_seperator.grid(column=0, row=1, columnspan=2, sticky=tkinter.EW, pady=(5, 5))
+        ui_adi_update_separator.grid(column=0, row=1, columnspan=2, sticky=tkinter.EW, pady=(5, 5))
         api_update_frame.grid(column=0, row=2, columnspan=2, padx=(10, 10))
         api_update_timer_header.grid(column=0, row=0, columnspan=2)
         api_update_timer_slider.grid(column=0, row=1)
@@ -1620,7 +1620,7 @@ class TextHandler(logging.Handler):
                 tag = 'CRITICAL'
             self.text.insert(tkinter.END, msg + '\n', tag)
             self.text.configure(state='disabled')
-            # Autoscroll to the bottom
+            # Auto-scroll to the bottom
             self.text.yview(tkinter.END)
         # This is necessary because we can't modify the Text from other threads
         self.text.after(0, append)
