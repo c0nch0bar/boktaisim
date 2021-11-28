@@ -51,8 +51,6 @@ def comprehensive_test():
     current_temp = 50.
     sun_value = 50
 
-    print('PING')
-
     def _wrap_update(variable: str):
         def update(value=None):
             global min_temp, avg_temp, max_temp, current_temp, sun_value
@@ -173,8 +171,10 @@ def general_test(
             'sun_location': sim._calulate_sun_value(sun_value, **kwargs),
             'random': sim.random_weather_value
         }
-        total = (values['temperature'] * 20) + (values['weather'] * 25) + (values['random'] * 25) + (values[
-            'sun_location'] * 30)
+        # total = (values['temperature'] * 10) + (values['weather'] * 20) + (values['random'] * 25) + (values[
+            # 'sun_location'] * 50)
+        total = (values['temperature'] * 15) + (values['weather'] * 25) + (values['random'] * 20) + (values[
+            'sun_location'] * 40)
         result = total / 100
         if weather_state in ('h', 't'):
             result -= 2

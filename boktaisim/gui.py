@@ -119,6 +119,7 @@ class WindowManager(object):
             # self.window.iconbitmap(self._imgs["boktaisim_icon.gif"])
             pass
         else:
+            return
             self.window.iconbitmap(self._imgs["boktaisim_icon.xbm"])
 
     def main(self) -> None:
@@ -238,7 +239,7 @@ class WindowManager(object):
             version_and_submit_frame, text="Boktai: ", name='version_label'
         )
         version_combo = tkinter.ttk.Combobox(
-            version_and_submit_frame,  width=2, style='custom.TCombobox', name='version_combo'
+            version_and_submit_frame,  width=2, style='custom.TCombobox', font=('TkDefaultFont'), name='version_combo'
         )
         version_combo['values'] = (1, 2, 3)
         version_combo.current(self.config.version - 1)
@@ -1116,7 +1117,10 @@ class WindowManager(object):
             return
         if self._sound_dict[sound]['segment']:
             logging.debug(f'Playing sound `{sound}`')
-            self._sound_dict[sound]['segment'].play()
+            try:
+                self._sound_dict[sound]['segment'].play()
+            except:
+                pass
 
     def about_window(self) -> None:
         about_window = tkinter.Toplevel(self.window)
@@ -1342,10 +1346,11 @@ class WindowManager(object):
                     font=('TkDefaultFont', main_font_height)
                 )
             if isinstance(widget, tkinter.ttk.Combobox):
-                style = tkinter.ttk.Style()
+                sized_font = font.Font(self.window, family='TkDefaultFont', size=main_font_height)
+                widget.configure(font=sized_font)
                 style.configure(
                     'custom.TCombobox',
-                    font=('TkDefaultFont', main_font_height)
+                    arrowsize=main_font_height
                 )
             if isinstance(widget, tkinter.ttk.Notebook):
                 style = tkinter.ttk.Style()

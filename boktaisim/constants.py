@@ -91,6 +91,10 @@ WEATHER_STATES_REVERSE = {
 }
 
 SUN_STATES = {
+    'sunrise': {
+        'name': 'Sunrise',
+        'icon': 'Rising.gif'
+    },
     'rise': {
         'name': 'Rising',
         'icon': 'Rising.gif'
@@ -103,6 +107,10 @@ SUN_STATES = {
         'name': 'Descending',
         'icon': 'Descending.gif'
     },
+    'sunset': {
+        'name': 'Sunset',
+        'icon': 'Descending.gif'
+    },
     'moon': {
         'name': 'Moonlight',
         'icon': 'Moonlight.gif'
@@ -110,12 +118,13 @@ SUN_STATES = {
 }
 
 FEATURE_WEIGHTS = {
-    'temperature': 20,
-    'weather': 25,
-    'sun_location': 30,
+    'temperature': 10,
+    'weather': 20,
+    'sun_location': 40,
     'random': 25
 }
 
+# Pixel offsets for the stages of the various meters
 BOKTAI_METER = {
     1: {
         0: 0,
@@ -156,6 +165,7 @@ BOKTAI_METER = {
     }
 }
 
+# List of all images to load at start
 IMAGES = [
     'boktai1_logo.gif',
     'boktai2_logo.gif',
@@ -170,7 +180,6 @@ IMAGES = [
     'boktaisim_icon.gif',
     'boktaisim_icon.ico',
     'boktaisim_icon.icns',
-    'boktaisim_icon.xbm',
     'Rising.gif',
     'At Apex.gif',
     'Descending.gif',

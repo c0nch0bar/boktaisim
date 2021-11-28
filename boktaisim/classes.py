@@ -492,6 +492,8 @@ class BoktaiSim(object):
         else:
             beta = beta_max / 100
         random_value = random.betavariate(alpha, beta) * 10
+        if sun_position <= 5 and random_value > 2:
+            random_value -= 2
         return random_value
 
     @property
