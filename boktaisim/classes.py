@@ -2,19 +2,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import appdirs
 import datetime
 import json
 import logging
-import pathlib
 import random
-import requests
 from typing import Optional, TYPE_CHECKING, Union
 
-from .constants import FEATURE_WEIGHTS, WEATHER_STATES
-from .utils import get_state
-
+import appdirs
+import pathlib
 import pyzipcode
+import requests
+import tzlocal
+
+from .constants import FEATURE_WEIGHTS, OPENMETEO_WEATHER_STATES, WEATHER_STATES
+from .utils import get_state
 
 BOKTAI_STATE = get_state()
 if BOKTAI_STATE == ('mac', 'frozen', 'app'):
@@ -168,7 +169,8 @@ class WeatherInfo(object):
             avg_temp: Optional[float] = None,
             raw_weather_data: Optional[dict] = None,
             woeid_options: Optional[dict] = None,
-            manual: bool = False
+            manual: bool = False,
+            data_source: Optional[str] = None
     ) -> None:
         self.state = state
         self.city = city
@@ -188,6 +190,7 @@ class WeatherInfo(object):
         self.timestamp = timestamp
         self.avg_temp = avg_temp
         self.manual = manual
+        self.data_source = data_source
         self._last_update = datetime.datetime.now()
         self._raw_data = raw_weather_data
         self._woeid_options = woeid_options
@@ -212,29 +215,65 @@ class WeatherInfo(object):
         if self._current_temp < self.min_temp:
             self.min_temp = self._current_temp
         self.visibility = latest_weather['visibility']
+        self.data_source = 'metaweather'
+        self._last_update = datetime.datetime.now()
+
+    def update_om(self) -> None:
+        if self.manual:
+            self._last_update = datetime.datetime.now()
+            return
+        weather_req = requests.get(
+            f'https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={long}&current_weather=true&hourly=temperature_2m,precipitation,weathercode,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,direct_radiation,diffuse_radiation&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset&windspeed_unit=mph&precipitation_unit=inch&timezone={timezone}'
+        )
+        weather_json = weather_req.json()
+        data_index = weather_json['hourly']['time'].index(current_hour)
+        weather_state = OPENMETEO_WEATHER_STATES[int(weather_json['current_weather']['weathercode'])]
+        self._raw_data = weather_json
+        self.timestamp = weather_json['current_weather']['time']
+        self.sunrise = weather_json['daily']['sunrise'][0]
+        self.sunset = weather_json['daily']['sunset'][0]
+        self.weather_state = latest_weather['weather_state_abbr']
+        self.min_temp = weather_json['daily']['temperature_2m_min'][0]
+        self.max_temp = weather_json['daily']['temperature_2m_max'][0]
+        self._current_temp = weather_json['current_weather']['temperature']
+        if self._current_temp > self.max_temp:
+            self.max_temp = self._current_temp
+        if self._current_temp < self.min_temp:
+            self.min_temp = self._current_temp
+        self.visibility = weather_data['hourly']['cloudcover'][data_index]
+        self.data_source = 'open-meteo'
         self._last_update = datetime.datetime.now()
 
     @property
+    def timestamp_format(self) -> str:
+        if self.data_source == 'open-meteo':
+            return '%Y-%m-%dT%H:%M'
+        elif self.data_source == 'metaweather':
+            return '%Y-%m-%dT%H:%M:%S.%f%z'
+        else:
+            return '%Y-%m-%dT%H:%M:%S.%f%z'
+
+    @property
     def weather_timestamp(self) -> datetime.datetime:
-        return datetime.datetime.strptime(self.timestamp, '%Y-%m-%dT%H:%M:%S.%f%z')
+        return datetime.datetime.strptime(self.timestamp, self.timestamp_format)
 
     @property
     def sunrise_timestamp(self) -> datetime.datetime:
         if len(self.sunset) == 32:
             tz = self.sunrise[-6:-3]
             tz += self.sunrise[-2:]
-            return datetime.datetime.strptime(self.sunrise[:-6] + tz, '%Y-%m-%dT%H:%M:%S.%f%z')
+            return datetime.datetime.strptime(self.sunrise[:-6] + tz, self.timestamp_format)
         else:
-            return datetime.datetime.strptime(self.sunrise, '%Y-%m-%dT%H:%M:%S.%f%z')
+            return datetime.datetime.strptime(self.sunrise, self.timestamp_format)
 
     @property
     def sunset_timestamp(self) -> datetime.datetime:
         if len(self.sunset) == 32:
             tx = self.sunset[-6:-3]
             tx += self.sunset[-2:]
-            return datetime.datetime.strptime(self.sunset[:-6] + tx, '%Y-%m-%dT%H:%M:%S.%f%z')
+            return datetime.datetime.strptime(self.sunset[:-6] + tx, self.timestamp_format)
         else:
-            return datetime.datetime.strptime(self.sunset, '%Y-%m-%dT%H:%M:%S.%f%z')
+            return datetime.datetime.strptime(self.sunset, self.timestamp_format)
 
     @property
     def sun_position(self) -> float:
@@ -242,7 +281,7 @@ class WeatherInfo(object):
             (self.sunset_timestamp - self.sunrise_timestamp).total_seconds()
         )
         seconds_left = round(
-            (self.sunset_timestamp - datetime.datetime.now(datetime.timezone.utc)).total_seconds()
+            (self.sunset_timestamp.astimezone() - datetime.datetime.now().astimezone()).total_seconds()
         )
         seconds_offest = seconds_of_daylight - seconds_left
         try:
@@ -270,6 +309,34 @@ class WeatherInfo(object):
         return round((datetime.datetime.now() - self._last_update).total_seconds())
 
     @classmethod
+    def from_latlong_om(cls, latitude: float, longitude: float) -> WeatherInfo:
+        latlong = str(latitude) + ',' + str(longitude)
+        timezone = str(tzlocal.get_localzone())
+        current_hour = datetime.datetime.now().astimezone().strftime('%Y-%m-%dT%H:00')
+        weather_req = requests.get(
+            f'https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current_weather=true&hourly=temperature_2m,precipitation,weathercode,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,direct_radiation,diffuse_radiation&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset&windspeed_unit=mph&precipitation_unit=inch&timezone={timezone}'
+        )
+        weather_json = weather_req.json()
+        data_index = weather_json['hourly']['time'].index(current_hour)
+        weather_state = OPENMETEO_WEATHER_STATES[int(weather_json['current_weather']['weathercode'])]
+        return cls(
+            state='<PLACEHOLDER>',
+            city='<PLACEHOLDER>',
+            latlong=latlong,
+            woeid='',
+            min_temp=weather_json['daily']['temperature_2m_min'][0],
+            max_temp=weather_json['daily']['temperature_2m_max'][0],
+            current_temp=weather_json['current_weather']['temperature'],
+            visibility=weather_json['hourly']['cloudcover'][data_index],
+            weather_state=weather_state,
+            sunrise=weather_json['daily']['sunrise'][0],
+            sunset=weather_json['daily']['sunset'][0],
+            timestamp=weather_json['current_weather']['time'],
+            raw_weather_data=weather_json,
+            data_source='open-meteo'
+        )
+
+    @classmethod
     def from_latlong(cls, latitude: float, longitude: float) -> WeatherInfo:
         latlong = str(latitude) + ',' + str(longitude)
         location_req = requests.get(
@@ -294,7 +361,38 @@ class WeatherInfo(object):
             sunset=weather_json['sun_set'],
             timestamp=latest_weather['created'],
             raw_weather_data=weather_json,
-            woeid_options=location_json
+            woeid_options=location_json,
+            data_source='metaweather'
+        )
+
+    @classmethod
+    def from_zip_om(cls, zipcode: int) -> WeatherInfo:
+        latlong = zip_to_latlong(zipcode)
+        lat, long = latlong.split(',')
+        zip_db = pyzipcode.ZipCodeDatabase()
+        timezone = str(tzlocal.get_localzone())
+        current_hour = datetime.datetime.now().astimezone().strftime('%Y-%m-%dT%H:00')
+        weather_req = requests.get(
+            f'https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={long}&current_weather=true&hourly=temperature_2m,precipitation,weathercode,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,direct_radiation,diffuse_radiation&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset&windspeed_unit=mph&precipitation_unit=inch&timezone={timezone}'
+        )
+        weather_json = weather_req.json()
+        data_index = weather_json['hourly']['time'].index(current_hour)
+        weather_state = OPENMETEO_WEATHER_STATES[int(weather_json['current_weather']['weathercode'])]
+        return cls(
+            state=zip_db[zipcode].state,
+            city=zip_db[zipcode].city,
+            latlong=latlong,
+            woeid='',
+            min_temp=weather_json['daily']['temperature_2m_min'][0],
+            max_temp=weather_json['daily']['temperature_2m_max'][0],
+            current_temp=weather_json['current_weather']['temperature'],
+            visibility=weather_json['hourly']['cloudcover'][data_index],
+            weather_state=weather_state,
+            sunrise=weather_json['daily']['sunrise'][0],
+            sunset=weather_json['daily']['sunset'][0],
+            timestamp=weather_json['current_weather']['time'],
+            raw_weather_data=weather_json,
+            data_source='open-meteo'
         )
 
     @classmethod
@@ -322,7 +420,8 @@ class WeatherInfo(object):
             sunset=weather_json['sun_set'],
             timestamp=latest_weather['created'],
             raw_weather_data=weather_json,
-            woeid_options=location_json
+            woeid_options=location_json,
+            data_source='metaweather'
         )
 
     @property
@@ -364,10 +463,10 @@ class BoktaiSim(object):
         if self.latlon:
             lat = float(latlon.split(',')[0])
             lon = float(latlon.split(',')[1])
-            self.weather = WeatherInfo.from_latlong(latitude=lat, longitude=lon)
+            self.weather = WeatherInfo.from_latlong_om(latitude=lat, longitude=lon)
         self.zipcode = zipcode
         if self.zipcode:
-            self.weather = WeatherInfo.from_zip(self.zipcode)
+            self.weather = WeatherInfo.from_zip_om(self.zipcode)
         self._lunar_mode = lunar_mode
         if not self._lunar_mode and not parent:
             self._lunar_mode = False

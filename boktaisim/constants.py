@@ -4,6 +4,38 @@ import datetime
 
 LOCAL_TIMEZONE = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 
+# Openmeteo uses different weather codes than metaweather, and they don't always neatly mesh.
+OPENMETEO_WEATHER_STATES = {
+    0: 'c',     # Clear Sky
+    1: 'lc',    # Mainly Clear
+    2: 'lc',    # Partly Cloudy
+    3: 'hc',    # Overcast
+    45: 'hc',   # Fog
+    48: 'hc',   # Depositing Rime Fog (Freezing Ice Fog)
+    51: 's',    # Light Drizzle
+    53: 's',    # Moderate Drizzle
+    55: 'lr',   # Dense Drizzle
+    56: 's',    # Light Freezing Drizzle
+    57: 'lr',   # Dense Freezing Drizzle
+    61: 'lr',   # Slight Rain
+    63: 'hr',   # Moderate Rain
+    65: 'hr',   # Heavy Rain
+    66: 'lr',   # Light Freezing Rain
+    67: 'h',    # Heavy Freezing Rain
+    71: 'sn',   # Slight Snow Fall
+    73: 'sn',   # Moderate Snow Fall
+    75: 'sn',   # heavy Snow Fall
+    77: 'sn',   # Snow Grains
+    80: 'hr',   # Slight Rain Showers
+    81: 'hr',   # Moderate Rain Showers
+    82: 'hr',   # Violent Rain Showers
+    85: 'sl',   # Slight Snow Showers
+    86: 'h',    # Heavy Snow Showers
+    95: 't',    # Slight or Moderate Thunderstorm
+    96: 't',    # Thunderstorm with Slight Hail
+    99: 't'     # Thunderstorm with Heavy Hail
+}
+
 WEATHER_STATES = {
     'sn': {
         'name': 'Snow',

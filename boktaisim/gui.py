@@ -1014,7 +1014,7 @@ class WindowManager(object):
             self.boktaisim = self._sim_dict[latlong]
             if self.boktaisim.weather.data_age() > self.config.api_update_interval:
                 try:
-                    self.boktaisim.weather.update()
+                    self.boktaisim.weather.update_om()
                 except Exception as e:
                     self.alert(
                         'warning',
