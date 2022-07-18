@@ -688,7 +688,7 @@ class WindowManager(object):
         latlon_note_label.grid(column=0, row=1, columnspan=4, sticky=tkinter.N)
         latlon_note_label.bind(
             '<Button-1>',
-            self._wrap_launch('https://www.gps-coordinates.net/my-location')
+            self._wrap_launch('https://www.latlong.net/')
         )
         manual_frame.columnconfigure(0, weight=1)
         manual_frame.columnconfigure(1, weight=1)

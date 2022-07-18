@@ -281,7 +281,7 @@ class WeatherInfo(object):
     @property
     def sun_position(self) -> float:
         seconds_of_daylight = round(
-            (self.sunset_timestamp - self.sunrise_timestamp).total_seconds()
+            (self.sunset_timestamp.astimezone() - self.sunrise_timestamp.astimezone()).total_seconds()
         )
         seconds_left = round(
             (self.sunset_timestamp.astimezone() - datetime.datetime.now().astimezone()).total_seconds()
