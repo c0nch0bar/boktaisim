@@ -235,7 +235,7 @@ class WeatherInfo(object):
         self.timestamp = weather_json['current_weather']['time']
         self.sunrise = weather_json['daily']['sunrise'][0]
         self.sunset = weather_json['daily']['sunset'][0]
-        self.weather_state = latest_weather['weather_state_abbr']
+        self.weather_state = weather_state
         self.min_temp = weather_json['daily']['temperature_2m_min'][0]
         self.max_temp = weather_json['daily']['temperature_2m_max'][0]
         self._current_temp = weather_json['current_weather']['temperature']
