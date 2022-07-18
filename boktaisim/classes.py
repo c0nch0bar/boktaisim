@@ -243,7 +243,7 @@ class WeatherInfo(object):
             self.max_temp = self._current_temp
         if self._current_temp < self.min_temp:
             self.min_temp = self._current_temp
-        self.visibility = weather_data['hourly']['cloudcover'][data_index]
+        self.visibility = weather_json['hourly']['cloudcover'][data_index]
         self.data_source = 'open-meteo'
         self._last_update = datetime.datetime.now()
 
