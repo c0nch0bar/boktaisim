@@ -179,8 +179,11 @@ Pull requests are always welcome!
 Acknowledgements
 ----------------
 
-This program utilizes the free weather API provided by https://www.metaweather.com/ (built by Jason_
-from Potato_) and would not be possible without it.
+This program used to utilize the free weather API provided by https://www.metaweather.com/ (built by Jason_
+from Potato_), however it seems to have disappeared. In it's place, it uses the Open-Meteo Weather Forecast
+API provided by https://open-meteo.com/.
+
+For translating lat/long to place names, the free Geocoding API by Maps.co is used: https://geocode.maps.co/.
 
 Weather icons were taken from `Font Awesome`_, with some adaptations.
 

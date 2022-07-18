@@ -322,9 +322,21 @@ class WeatherInfo(object):
         weather_json = weather_req.json()
         data_index = weather_json['hourly']['time'].index(current_hour)
         weather_state = OPENMETEO_WEATHER_STATES[int(weather_json['current_weather']['weathercode'])]
+        location_req = requests.get(
+            f'https://geocode.maps.co/reverse?lat={latitude}&lon={longitude}'
+        )
+        location_json = location_req.json()
+        try:
+            state = location_json['address']['state']
+        except (KeyError, ValueError):
+            state = 'Unknown'
+        try:
+            city = location_json['address']['city']
+        except (KeyError, ValueError):
+            city = 'Unknown'
         return cls(
-            state='<PLACEHOLDER>',
-            city='<PLACEHOLDER>',
+            state=state,
+            city=city,
             latlong=latlong,
             woeid='',
             min_temp=weather_json['daily']['temperature_2m_min'][0],
