@@ -101,7 +101,8 @@ setup(
         'pyzipcode',
         'appdirs',
         'simpleaudio',
-        'Pillow'
+        'Pillow',
+        'tzlocal'
     ],
     entry_points={
         'console_scripts': ['boktaisim=boktaisim.boktaisim:main'],

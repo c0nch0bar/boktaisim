@@ -222,6 +222,7 @@ class WeatherInfo(object):
         if self.manual:
             self._last_update = datetime.datetime.now()
             return
+        lat, long = self.latlong.split(',')
         weather_req = requests.get(
             f'https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={long}&current_weather=true&hourly=temperature_2m,precipitation,weathercode,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,direct_radiation,diffuse_radiation&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset&windspeed_unit=mph&precipitation_unit=inch&timezone={timezone}'
         )
